@@ -1,0 +1,44 @@
+public class Main extends java.lang.Object
+{
+
+    public static void main(java.lang.String[])
+    {
+        java.lang.String[] args;
+        Main f, temp$0;
+        int a, b, x, temp$1, temp$2, temp$3, temp$4;
+
+        args := @parameter0: java.lang.String[];
+        temp$0 = new Main;
+        specialinvoke temp$0.<Main: void <init>()>();
+        f = temp$0;
+        a = 7;
+        b = 14;
+        temp$1 = virtualinvoke f.<Main: int bar(int)>(21);
+        temp$2 = temp$1;
+        temp$3 = temp$2 + a;
+        temp$4 = temp$3 * b;
+        x = temp$4;
+        return;
+    }
+
+    public int bar(int)
+    {
+        Main this;
+        int n, temp$0, temp$1;
+
+        this := @this: Main;
+        n := @parameter0: int;
+        temp$0 = n;
+        temp$1 = temp$0 + 42;
+        return temp$1;
+    }
+
+    public void <init>()
+    {
+        Main this;
+
+        this := @this: Main;
+        specialinvoke this.<java.lang.Object: void <init>()>();
+        return;
+    }
+}

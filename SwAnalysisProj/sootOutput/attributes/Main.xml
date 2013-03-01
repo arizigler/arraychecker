@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="ISO-8859-1"?>
+<attributes>
+<attribute>
+<srcPos sline="11" eline="11" spos="8" epos="10"/>
+<jmpPos sline="0" eline="0" spos="0" epos="0"/>
+<text info="[safe lower bound][safe upper bound]" aType="ArrayCheckTag"/>
+</attribute>
+<attribute>
+<srcPos sline="14" eline="14" spos="8" epos="10"/>
+<jmpPos sline="0" eline="0" spos="0" epos="0"/>
+<text info="[safe lower bound][safe upper bound]" aType="ArrayCheckTag"/>
+</attribute>
+<attribute>
+<srcPos sline="17" eline="17" spos="9" epos="15"/>
+<jmpPos sline="0" eline="0" spos="0" epos="0"/>
+<text info="[potentially unsafe lower bound][potentially unsafe upper bound]" aType="ArrayCheckTag"/>
+</attribute>
+<attribute>
+<srcPos sline="0" eline="0" spos="0" epos="0"/>
+<jmpPos sline="0" eline="0" spos="0" epos="0"/>
+<text info="[args]" aType="ParamNamesTag"/>
+</attribute>
+<attribute>
+<srcPos sline="0" eline="0" spos="0" epos="0"/>
+<jmpPos sline="0" eline="0" spos="0" epos="0"/>
+<text info="[n]" aType="ParamNamesTag"/>
+</attribute>
+<attribute>
+<srcPos sline="0" eline="0" spos="0" epos="0"/>
+<jmpPos sline="0" eline="0" spos="0" epos="0"/>
+<text info="[]" aType="ParamNamesTag"/>
+</attribute>
+</attributes>
