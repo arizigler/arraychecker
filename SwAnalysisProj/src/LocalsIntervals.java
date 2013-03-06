@@ -20,6 +20,7 @@
 import java.util.*;
 
 import soot.*;
+import soot.jimple.IntConstant;
 import soot.options.Options;
 import soot.toolkits.graph.UnitGraph;
 import soot.toolkits.scalar.*;
@@ -81,21 +82,27 @@ class LocalIntervalsAnalysis extends ForwardFlowAnalysis {
 				0.7f);
 
 		Iterator unitIt = graph.iterator();
-
 		while (unitIt.hasNext()) {
 			Unit s = (Unit) unitIt.next();
 
 			FlowSet genSet = emptySet.clone();
 
-			Iterator boxIt = s.getDefBoxes().iterator();
-
-			while (boxIt.hasNext()) {
-				ValueBox box = (ValueBox) boxIt.next();
-				Type t = box.getValue().getType();
-				if (box.getValue() instanceof Local) genSet.add(box.getValue(),
-						genSet);
+			Iterator useBoxIt = s.getUseBoxes().iterator();
+			Iterator defBoxIt = s.getDefBoxes().iterator();
+			ValueBox defBox = null;
+			if (defBoxIt.hasNext()) {
+				defBox = (ValueBox) defBoxIt.next();
 			}
-
+			if (defBox != null && defBox.getValue() instanceof Local) {
+				while (useBoxIt.hasNext()) {
+					ValueBox useBox = (ValueBox) useBoxIt.next();
+					if (useBox.getValue() instanceof IntConstant) {
+						IntConstant c = (IntConstant) useBox.getValue();
+						genSet.add(new VarInterval(c.value, c.value, defBox
+								.getValue().toString()), genSet);
+					}
+				}
+			}
 			unitToGenerateSet.put(s, genSet);
 		}
 
@@ -127,12 +134,13 @@ class LocalIntervalsAnalysis extends ForwardFlowAnalysis {
 	}
 
 	/**
-	 * All paths == Intersection.
+	 * All paths == Union.
 	 **/
 	protected void merge(Object in1, Object in2, Object out) {
 		FlowSet inSet1 = (FlowSet) in1, inSet2 = (FlowSet) in2, outSet = (FlowSet) out;
 
-		inSet1.intersection(inSet2, outSet);
+		inSet1.union(inSet2, outSet);
+		// inSet1.intersection(inSet2, outSet);
 	}
 
 	protected void copy(Object source, Object dest) {
