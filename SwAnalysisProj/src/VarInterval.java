@@ -1,29 +1,15 @@
 public class VarInterval {
 
-	private long	m_lowerBound;
-	private long	m_upperBound;
-	private String	m_var;
+	private String		m_var;
+	private Interval	m_interval;
 
-	public VarInterval(long lower, long upper, String var) {
-		m_lowerBound = lower;
-		m_upperBound = upper;
+	public VarInterval(Interval interval, String var) {
+		m_interval = interval;
 		m_var = var;
 	}
 
-	public long getLowerBound() {
-		return m_lowerBound;
-	}
-
-	public void setLowerBound(int m_lowerBound) {
-		this.m_lowerBound = m_lowerBound;
-	}
-
-	public long getUpperBound() {
-		return m_upperBound;
-	}
-
-	public void setUpperBound(int m_upperBound) {
-		this.m_upperBound = m_upperBound;
+	public Interval getInterval() {
+		return m_interval;
 	}
 
 	public String getVar() {
@@ -34,20 +20,17 @@ public class VarInterval {
 		this.m_var = m_var;
 	}
 
-	public void add(VarInterval other) {
-		m_lowerBound += other.getLowerBound();
-		m_upperBound += other.getUpperBound();
-	}
-
 	@Override
 	public String toString() {
-		return "(" + m_var + ", [" + m_lowerBound + "," + m_upperBound + "])";
+		return "(" + m_var + ", [" + this.m_interval.getLowerBound() + ","
+				+ this.m_interval.getUpperBound() + "])";
 	}
 
 	@Override
 	public boolean equals(Object o) {
 		VarInterval other = (VarInterval) o;
-		return this.m_var.equals(other.getVar());
+		return (this.m_var.equals(other.getVar()));
+		// return (this.m_var.equals(other.getVar()) && this.m_interval
+		// .equals(other.getInterval()));
 	}
-
 }

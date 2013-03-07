@@ -69,43 +69,55 @@ public class LocalsIntervals {
 @SuppressWarnings({ "unchecked", "rawtypes" })
 class LocalIntervalsAnalysis extends ForwardFlowAnalysis {
 
-	FlowSet				emptySet	= new ArraySparseSet();
-	Map<Unit, FlowSet>	unitToGenerateSet;
+	FlowSet				emptySet			= new ArraySparseSet();
+	Map<Unit, FlowSet>	unitToGenerateSet	= new HashMap<Unit, FlowSet>(
+													graph.size() * 2 + 1, 0.7f);
+	Map<Unit, FlowSet>	unitToKillSet		= new HashMap<Unit, FlowSet>(
+													graph.size() * 2 + 1, 0.7f);
 
 	LocalIntervalsAnalysis(UnitGraph graph) {
 		super(graph);
-		unitToGenerateSet = new HashMap<Unit, FlowSet>(graph.size() * 2 + 1,
-				0.7f);
-
-		// Create generate sets
-		unitToGenerateSet = new HashMap<Unit, FlowSet>(graph.size() * 2 + 1,
-				0.7f);
-
 		Iterator unitIt = graph.iterator();
+
+		/* Create gen and kill sets */
 		while (unitIt.hasNext()) {
 			Unit s = (Unit) unitIt.next();
 
 			FlowSet genSet = emptySet.clone();
+			FlowSet killSet = emptySet.clone();
 
-			Iterator useBoxIt = s.getUseBoxes().iterator();
-			Iterator defBoxIt = s.getDefBoxes().iterator();
 			ValueBox defBox = null;
-			if (defBoxIt.hasNext()) {
-				defBox = (ValueBox) defBoxIt.next();
+			Iterator useBoxIter = s.getUseBoxes().iterator();
+			Iterator defBoxIter = s.getDefBoxes().iterator();
+
+			if (defBoxIter.hasNext()) {
+				defBox = (ValueBox) defBoxIter.next();
 			}
+
+			/* Create gen and kill sets */
 			if (defBox != null && defBox.getValue() instanceof Local) {
-				while (useBoxIt.hasNext()) {
-					ValueBox useBox = (ValueBox) useBoxIt.next();
+				String variableName = defBox.getValue().toString();
+
+				/* Create gen set for "x = IntConstant" statements */
+				if (s.getUseBoxes().size() == 1) {
+					ValueBox useBox = (ValueBox) useBoxIter.next();
 					if (useBox.getValue() instanceof IntConstant) {
-						IntConstant c = (IntConstant) useBox.getValue();
-						genSet.add(new VarInterval(c.value, c.value, defBox
-								.getValue().toString()), genSet);
+						int variableValue = ((IntConstant) useBox.getValue()).value;
+						genSet.add(new VarInterval(new Interval(variableValue,
+								variableValue), variableName), genSet);
 					}
 				}
+				/* Create kill set for the variable definition */
+				killSet.add(variableName, killSet);
 			}
-			unitToGenerateSet.put(s, genSet);
-		}
+			/* This is not a local variable definition */
+			else {
+				/* nothing to do */
+			}
 
+			unitToGenerateSet.put(s, genSet);
+			unitToKillSet.put(s, killSet);
+		}
 		doAnalysis();
 	}
 
@@ -129,7 +141,7 @@ class LocalIntervalsAnalysis extends ForwardFlowAnalysis {
 	protected void flowThrough(Object inValue, Object unit, Object outValue) {
 		FlowSet in = (FlowSet) inValue, out = (FlowSet) outValue;
 
-		// perform generation (kill set is empty)
+		// perform generation (need to subtract killSet)
 		in.union(unitToGenerateSet.get(unit), out);
 	}
 
@@ -138,9 +150,64 @@ class LocalIntervalsAnalysis extends ForwardFlowAnalysis {
 	 **/
 	protected void merge(Object in1, Object in2, Object out) {
 		FlowSet inSet1 = (FlowSet) in1, inSet2 = (FlowSet) in2, outSet = (FlowSet) out;
+		FlowSet genIntervals = emptySet.clone();
 
-		inSet1.union(inSet2, outSet);
-		// inSet1.intersection(inSet2, outSet);
+		Iterator set1Iter = inSet1.iterator();
+		Iterator set2Iter = inSet2.iterator();
+
+		/* Debug prints */
+
+		// G.v().out.println("in1Set size is: " + inSet1.size()
+		// + " , elements are:");
+		// while (set1Iter.hasNext()) {
+		// VarInterval v = (VarInterval) set1Iter.next();
+		// G.v().out.println("varName: " + v.getVar() + " Interval: "
+		// + v.getInterval().toString());
+		// }
+		//
+		//
+		// G.v().out.println("in2Set size is: " + inSet2.size()
+		// + " , elements are:");
+		// while (set2Iter.hasNext()) {
+		// VarInterval v = (VarInterval) set2Iter.next();
+		// G.v().out.println("varName: " + v.getVar() + " Interval: "
+		// + v.getInterval().toString());
+		// }
+		//
+		// set1Iter = inSet1.iterator();
+		// set2Iter = inSet2.iterator();
+
+		/* Combining intervals */
+		while (set1Iter.hasNext()) {
+			VarInterval vi1 = (VarInterval) set1Iter.next();
+			while (set2Iter.hasNext()) {
+				VarInterval vi2 = (VarInterval) set2Iter.next();
+				if (vi1.equals(vi2)) {
+					genIntervals
+							.add(new VarInterval(Interval.combine(
+									vi1.getInterval(), vi2.getInterval()), vi1
+									.getVar()));
+				}
+			}
+			set2Iter = inSet2.iterator();
+		}
+		Iterator genIter = genIntervals.iterator();
+		G.v().out.println("genSet size is: " + genIntervals.size()
+				+ " , elements are:");
+		while (genIter.hasNext()) {
+			VarInterval v = (VarInterval) genIter.next();
+			G.v().out.println("varName: " + v.getVar() + " Interval: "
+					+ v.getInterval().toString());
+		}
+
+		/* outSet = (inSet1 - inSet2) */
+		inSet1.difference(inSet2, outSet);
+		/* inSet2 = (inSet2 - inSet1) */
+		inSet2.difference(inSet1);
+		/* update outSet to contain all different elements from inSet1, inSet2 */
+		outSet.union(inSet2, outSet);
+		/* add to outSet the combined intervals of the common variables */
+		genIntervals.union(outSet, outSet);
 	}
 
 	protected void copy(Object source, Object dest) {
