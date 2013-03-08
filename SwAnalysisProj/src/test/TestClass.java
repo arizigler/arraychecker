@@ -12,5 +12,8 @@ public class TestClass {
 		if (bool) {
 			int e = 3;
 		}
+		else {
+			int e = 4;
+		}
 	}
 }
