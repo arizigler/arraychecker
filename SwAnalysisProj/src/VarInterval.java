@@ -30,7 +30,5 @@ public class VarInterval {
 	public boolean equals(Object o) {
 		VarInterval other = (VarInterval) o;
 		return (this.m_var.equals(other.getVar()));
-		// return (this.m_var.equals(other.getVar()) && this.m_interval
-		// .equals(other.getInterval()));
 	}
 }
