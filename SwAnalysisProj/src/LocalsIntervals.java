@@ -155,7 +155,6 @@ class LocalIntervalsAnalysis extends ForwardFlowAnalysis {
 						genSet.add(
 								new VarInterval(variableName, vi.getInterval()),
 								genSet);
-						unitToGenerateSet.put(s, genSet);
 					}
 				}
 				/* Binary operations */
@@ -167,18 +166,16 @@ class LocalIntervalsAnalysis extends ForwardFlowAnalysis {
 						Value op2 = ((AddExpr) rhs).getOp2();
 						VarInterval vi = addExprInterval(variableName, op1,
 								op2, in);
-						genSet.add(vi, genSet);
-						unitToGenerateSet.put(s, genSet);
+						genSet.add(vi);
 					}
 
 					/* x = a - b */
-					if (rhs instanceof AddExpr) {
+					else if (rhs instanceof AddExpr) {
 						Value op1 = ((AddExpr) rhs).getOp1();
 						Value op2 = ((AddExpr) rhs).getOp2();
 						VarInterval vi = subExprInterval(variableName, op1,
 								op2, in);
-						genSet.add(vi, genSet);
-						unitToGenerateSet.put(s, genSet);
+						genSet.add(vi);
 					}
 
 					/* x = a * b */
@@ -187,6 +184,7 @@ class LocalIntervalsAnalysis extends ForwardFlowAnalysis {
 						Value op2 = ((MulExpr) rhs).getOp2();
 						VarInterval vi = mulExprInterval(variableName, op1,
 								op2, in);
+						genSet.add(vi);
 					}
 				}
 
@@ -200,13 +198,14 @@ class LocalIntervalsAnalysis extends ForwardFlowAnalysis {
 				// }
 
 			}
+			unitToGenerateSet.put(s, genSet);
 		}
 		/* Update output, subtract kill and add gen */
 		/* Debug prints */
 		// G.v().out.println("in= "+ in + " kill= "+
 		// unitToKillSet.get(unit)+ " gen= "+ unitToGenerateSet.get(unit));
 		in.difference(unitToKillSet.get(unit));
-		in.union(unitToGenerateSet.get(unit), out);		
+		in.union(unitToGenerateSet.get(unit), out);
 	}
 
 	/**
@@ -303,21 +302,6 @@ class LocalIntervalsAnalysis extends ForwardFlowAnalysis {
 		}
 		return null;
 	}
-
-	// private Interval getInterval(ValueBox useBox, FlowSet in) {
-	// Interval i1 = null;
-	// if (useBox.getValue() instanceof IntConstant) {
-	// int val = ((IntConstant)useBox.getValue()).value;
-	// i1 = new Interval(val,val);
-	// }
-	// else if (useBox.getValue() instanceof Local) {
-	// VarInterval vi = flowSetContain(in,useBox.getValue().toString());
-	// if (vi != null) {
-	// i1 = new Interval(vi.getInterval());
-	// }
-	// }
-	// return i1;
-	// }
 
 	private VarInterval addExprInterval(String defName, Value op1, Value op2,
 			FlowSet in) {

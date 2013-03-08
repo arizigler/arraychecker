@@ -41,9 +41,19 @@ public class Interval {
 	}
 
 	public static Interval mul(Interval i1, Interval i2) {
-		long lower = i1.getLowerBound() - i2.getLowerBound();
-		long upper = i1.getUpperBound() - i2.getUpperBound();
-		return new Interval(lower, upper);
+		/*
+		 * [a, b] ª [c, d] = [min (a ª c, a ª d, b ª c, b ª d), max (a ª c, a ª
+		 * d, b ª c, b ª d)]
+		 */
+		return new Interval(Math.min(
+				Math.min(i1.getLowerBound() * i2.getLowerBound(),
+						i1.getLowerBound() * i2.getUpperBound()),
+				Math.min(i1.getUpperBound() * i2.getLowerBound(),
+						i1.getUpperBound() * i2.getUpperBound())), Math.max(
+				Math.max(i1.getLowerBound() * i2.getLowerBound(),
+						i1.getLowerBound() * i2.getUpperBound()),
+				Math.max(i1.getUpperBound() * i2.getLowerBound(),
+						i1.getUpperBound() * i2.getUpperBound())));
 	}
 
 	public long getLowerBound() {
