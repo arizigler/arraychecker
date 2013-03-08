@@ -24,7 +24,6 @@ import soot.jimple.IntConstant;
 import soot.options.Options;
 import soot.toolkits.graph.UnitGraph;
 import soot.toolkits.scalar.*;
-import soot.util.Numberable;
 
 @SuppressWarnings({ "unchecked", "rawtypes" })
 public class LocalsIntervals {
@@ -142,12 +141,12 @@ class LocalIntervalsAnalysis extends ForwardFlowAnalysis {
 	protected void flowThrough(Object inValue, Object unit, Object outValue) {
 		FlowSet in = (FlowSet) inValue, out = (FlowSet) outValue;
 		FlowSet genSet = emptySet.clone();
-		
+
 		Unit s = (Unit) unit;
 		Iterator useBoxIter = s.getUseBoxes().iterator();
 		Iterator defBoxIter = s.getDefBoxes().iterator();
 		ValueBox defBox = null;
-		
+
 		if (defBoxIter.hasNext()) {
 			defBox = (ValueBox) defBoxIter.next();
 		}
@@ -159,9 +158,11 @@ class LocalIntervalsAnalysis extends ForwardFlowAnalysis {
 				ValueBox useBox = (ValueBox) useBoxIter.next();
 				/* Create gen set for "x = y" statements */
 				if (useBox.getValue() instanceof Local) {
-					VarInterval vi = flowSetContain(in,useBox.getValue().toString());
+					VarInterval vi = flowSetContain(in, useBox.getValue()
+							.toString());
 					if (vi != null) {
-						genSet.add(new VarInterval(vi.getInterval(),variableName),genSet);
+						genSet.add(new VarInterval(vi.getInterval(),
+								variableName), genSet);
 						unitToGenerateSet.put(s, genSet);
 					}
 				}
@@ -179,7 +180,7 @@ class LocalIntervalsAnalysis extends ForwardFlowAnalysis {
 		FlowSet genIntervals = emptySet.clone();
 
 		Iterator set1Iter = inSet1.iterator();
-//		Iterator set2Iter = inSet2.iterator();
+		// Iterator set2Iter = inSet2.iterator();
 
 		/* Debug prints */
 
@@ -208,30 +209,18 @@ class LocalIntervalsAnalysis extends ForwardFlowAnalysis {
 			VarInterval vi1 = (VarInterval) set1Iter.next();
 			VarInterval vi2 = flowSetContain(inSet2, vi1.getVar());
 			if (vi2 != null) {
-				genIntervals
-						.add(new VarInterval(Interval.combine(
-								vi1.getInterval(), vi2.getInterval()), vi1
-								.getVar()));
+				genIntervals.add(new VarInterval(Interval.combine(
+						vi1.getInterval(), vi2.getInterval()), vi1.getVar()));
 			}
-//			while (set2Iter.hasNext()) {
-//				VarInterval vi2 = (VarInterval) set2Iter.next();
-//				if (vi1.equals(vi2)) {
-//					genIntervals
-//							.add(new VarInterval(Interval.combine(
-//									vi1.getInterval(), vi2.getInterval()), vi1
-//									.getVar()));
-//				}
-//			}
-//			set2Iter = inSet2.iterator();
 		}
-		Iterator genIter = genIntervals.iterator();
-		G.v().out.println("genSet size is: " + genIntervals.size()
-				+ " , elements are:");
-		while (genIter.hasNext()) {
-			VarInterval v = (VarInterval) genIter.next();
-			G.v().out.println("varName: " + v.getVar() + " Interval: "
-					+ v.getInterval().toString());
-		}
+		// Iterator genIter = genIntervals.iterator();
+		// G.v().out.println("genSet size is: " + genIntervals.size()
+		// + " , elements are:");
+		// while (genIter.hasNext()) {
+		// VarInterval v = (VarInterval) genIter.next();
+		// G.v().out.println("varName: " + v.getVar() + " Interval: "
+		// + v.getInterval().toString());
+		// }
 
 		/* outSet = (inSet1 - inSet2) */
 		inSet1.difference(inSet2, outSet);
@@ -248,18 +237,17 @@ class LocalIntervalsAnalysis extends ForwardFlowAnalysis {
 
 		sourceSet.copy(destSet);
 	}
-	
-	/* returns the corresponding varInterval from the flowSet (fs) according to viName,
-	 * if the flowSet doesn't contain that varInterval returns null
-	 * */
+
+	/*
+	 * returns the corresponding varInterval from the flowSet (fs) according to
+	 * viName, if the flowSet doesn't contain that varInterval returns null
+	 */
 	private VarInterval flowSetContain(FlowSet fs, String viName) {
 		Iterator fsIter = fs.iterator();
 		VarInterval vi = null;
 		while (fsIter.hasNext()) {
 			vi = (VarInterval) fsIter.next();
-			if (vi.getVar().equals(viName)) {
-				return vi;
-			}
+			if (vi.getVar().equals(viName)) { return vi; }
 		}
 		return vi;
 	}
