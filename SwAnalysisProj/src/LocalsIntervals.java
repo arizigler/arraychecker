@@ -20,8 +20,7 @@
 import java.util.*;
 
 import soot.*;
-import soot.jimple.IntConstant;
-import soot.jimple.MulExpr;
+import soot.jimple.*;
 import soot.toolkits.graph.UnitGraph;
 import soot.toolkits.scalar.*;
 
@@ -135,45 +134,50 @@ class LocalIntervalsAnalysis extends ForwardFlowAnalysis {
 	 * OUT is the same as IN plus the genSet.
 	 **/
 	protected void flowThrough(Object inValue, Object unit, Object outValue) {
+
 		FlowSet in = (FlowSet) inValue, out = (FlowSet) outValue;
 		FlowSet genSet = emptySet.clone();
 
 		Unit s = (Unit) unit;
 
-		Iterator useBoxIter = s.getUseBoxes().iterator();
-		Iterator defBoxIter = s.getDefBoxes().iterator();
-		ValueBox defBox = null;
+		/* Assign statements */
+		if (s instanceof AssignStmt) {
+			Value lhs = ((AssignStmt) s).getLeftOp();
+			Value rhs = ((AssignStmt) s).getRightOp();
 
-		if (defBoxIter.hasNext()) {
-			defBox = (ValueBox) defBoxIter.next();
-		}
+			if (lhs instanceof Local) {
+				String variableName = lhs.toString();
 
-		if (defBox != null && defBox.getValue() instanceof Local) {
-			String variableName = defBox.getValue().toString();
-
-			if (s.getUseBoxes().size() == 1) {
-				ValueBox useBox = (ValueBox) useBoxIter.next();
-				/* Create gen set for "x = y" statements */
-				if (useBox.getValue() instanceof Local) {
-					VarInterval vi = flowSetContain(in, useBox.getValue()
-							.toString());
+				/* x = y */
+				if (rhs instanceof Local) {
+					VarInterval vi = flowSetContain(in, rhs.toString());
 					if (vi != null) {
 						genSet.add(new VarInterval(vi.getInterval(),
 								variableName), genSet);
 						unitToGenerateSet.put(s, genSet);
 					}
 				}
-			}
-			while (useBoxIter.hasNext()) {
-				ValueBox useBox = (ValueBox) useBoxIter.next();
-				if (useBox instanceof MulExpr) {
-					VarInterval vi = flowSetContain(in, useBox.getValue()
-							.toString());
+				/* Binary operations */
+				else if (rhs instanceof BinopExpr) {
+
+					/* x = a + b */
+					if (rhs instanceof AddExpr) {
+						Value op1 = ((AddExpr) rhs).getOp1();
+						Value op2 = ((AddExpr) rhs).getOp2();
+						/* your code here */
+					}
+					/* x = a * b */
+					else if (rhs instanceof MulExpr) {
+						Value op1 = ((MulExpr) rhs).getOp1();
+						Value op2 = ((MulExpr) rhs).getOp2();
+						/* my code here */
+					}
 				}
 			}
 		}
 
-		// perform generation (need to subtract killSet)
+		/* Update output, subtract kill and add gen */
+		in.difference(unitToKillSet.get(unit));
 		in.union(unitToGenerateSet.get(unit), out);
 	}
 
