@@ -172,7 +172,7 @@ class LocalIntervalsAnalysis extends ForwardFlowAnalysis {
 					}
 
 					/* x = a - b */
-					if (rhs instanceof SubExpr) {
+					else if (rhs instanceof SubExpr) {
 						Value op1 = ((SubExpr) rhs).getOp1();
 						Value op2 = ((SubExpr) rhs).getOp2();
 						VarInterval vi = subExprInterval(variableName, op1,
