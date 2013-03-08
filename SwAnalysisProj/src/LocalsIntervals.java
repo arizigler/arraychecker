@@ -185,9 +185,8 @@ class LocalIntervalsAnalysis extends ForwardFlowAnalysis {
 					else if (rhs instanceof MulExpr) {
 						Value op1 = ((MulExpr) rhs).getOp1();
 						Value op2 = ((MulExpr) rhs).getOp2();
-						Interval i1 = getInterval(op1, in);
-						Interval i2 = getInterval(op2, in);
-
+						VarInterval vi = mulExprInterval(variableName, op1,
+								op2, in);
 					}
 				}
 
@@ -338,6 +337,13 @@ class LocalIntervalsAnalysis extends ForwardFlowAnalysis {
 	private VarInterval negExprInterval(String defName, Value op1, FlowSet in) {
 		Interval i1 = getInterval(op1, in);
 		return new VarInterval(defName, Interval.negExpr(i1));
+	}
+
+	private VarInterval mulExprInterval(String defName, Value op1, Value op2,
+			FlowSet in) {
+		Interval i1 = getInterval(op1, in);
+		Interval i2 = getInterval(op2, in);
+		return new VarInterval(defName, Interval.mul(i1, i2));
 	}
 
 }
