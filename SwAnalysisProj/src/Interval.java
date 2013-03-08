@@ -16,6 +16,7 @@ public class Interval {
 		m_upperBound = inter.getUpperBound();
 	}
 
+
 	public static Interval combine(Interval i1, Interval i2) {
 		long lower = Math.min(i1.getLowerBound(), i2.getLowerBound());
 		long upper = Math.max(i1.getUpperBound(), i2.getUpperBound());
