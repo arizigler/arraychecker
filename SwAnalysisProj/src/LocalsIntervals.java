@@ -165,23 +165,50 @@ class LocalIntervalsAnalysis extends ForwardFlowAnalysis {
 					if (rhs instanceof AddExpr) {
 						Value op1 = ((AddExpr) rhs).getOp1();
 						Value op2 = ((AddExpr) rhs).getOp2();
-						/* your code here */
+						VarInterval vi = addExprInterval(variableName, op1,
+								op2, in);
+						genSet.add(vi, genSet);
+						unitToGenerateSet.put(s, genSet);
 					}
+
+					/* x = a - b */
+					if (rhs instanceof AddExpr) {
+						Value op1 = ((AddExpr) rhs).getOp1();
+						Value op2 = ((AddExpr) rhs).getOp2();
+						VarInterval vi = subExprInterval(variableName, op1,
+								op2, in);
+						genSet.add(vi, genSet);
+						unitToGenerateSet.put(s, genSet);
+					}
+
 					/* x = a * b */
 					else if (rhs instanceof MulExpr) {
 						Value op1 = ((MulExpr) rhs).getOp1();
 						Value op2 = ((MulExpr) rhs).getOp2();
-						Interval i1 = getInterval(in, op1);
-						Interval i2 = getInterval(in, op2);
+						Interval i1 = getInterval(op1, in);
+						Interval i2 = getInterval(op2, in);
 
 					}
 				}
-			}
-		}
 
-		/* Update output, subtract kill and add gen */
-		in.difference(unitToKillSet.get(unit));
-		in.union(unitToGenerateSet.get(unit), out);
+				/* Binary operations */
+				// else if (rhs instanceof ???) {
+				// /* x = - a */
+				// VarInterval vi = negExprInterval(variableName,
+				// s.getUseBoxes(), in);
+				// genSet.add(vi, genSet);
+				// unitToGenerateSet.put(s, genSet);
+				// }
+
+			}
+			/* Update output, subtract kill and add gen */
+			/* Debug prints */
+			// G.v().out.println("in= "+ in + " kill= "+
+			// unitToKillSet.get(unit)+ " gen= "+ unitToGenerateSet.get(unit));
+			in.difference(unitToKillSet.get(unit));
+			in.union(unitToGenerateSet.get(unit), out);
+
+		}
 	}
 
 	/**
@@ -264,7 +291,7 @@ class LocalIntervalsAnalysis extends ForwardFlowAnalysis {
 		return vi;
 	}
 
-	private Interval getInterval(FlowSet fs, Value val) {
+	private Interval getInterval(Value val, FlowSet fs) {
 
 		/* Value is a constant */
 		if (val instanceof IntConstant) {
@@ -278,4 +305,39 @@ class LocalIntervalsAnalysis extends ForwardFlowAnalysis {
 		}
 		return null;
 	}
+
+	// private Interval getInterval(ValueBox useBox, FlowSet in) {
+	// Interval i1 = null;
+	// if (useBox.getValue() instanceof IntConstant) {
+	// int val = ((IntConstant)useBox.getValue()).value;
+	// i1 = new Interval(val,val);
+	// }
+	// else if (useBox.getValue() instanceof Local) {
+	// VarInterval vi = flowSetContain(in,useBox.getValue().toString());
+	// if (vi != null) {
+	// i1 = new Interval(vi.getInterval());
+	// }
+	// }
+	// return i1;
+	// }
+
+	private VarInterval addExprInterval(String defName, Value op1, Value op2,
+			FlowSet in) {
+		Interval i1 = getInterval(op1, in);
+		Interval i2 = getInterval(op2, in);
+		return new VarInterval(defName, Interval.addExpr(i1, i2));
+	}
+
+	private VarInterval subExprInterval(String defName, Value op1, Value op2,
+			FlowSet in) {
+		Interval i1 = getInterval(op1, in);
+		Interval i2 = getInterval(op2, in);
+		return new VarInterval(defName, Interval.subExpr(i1, i2));
+	}
+
+	private VarInterval negExprInterval(String defName, Value op1, FlowSet in) {
+		Interval i1 = getInterval(op1, in);
+		return new VarInterval(defName, Interval.negExpr(i1));
+	}
+
 }
