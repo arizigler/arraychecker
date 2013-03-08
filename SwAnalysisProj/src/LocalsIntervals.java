@@ -98,12 +98,12 @@ class LocalIntervalsAnalysis extends ForwardFlowAnalysis {
 					ValueBox useBox = (ValueBox) useBoxIter.next();
 					if (useBox.getValue() instanceof IntConstant) {
 						int variableValue = ((IntConstant) useBox.getValue()).value;
-						genSet.add(new VarInterval(new Interval(variableValue,
-								variableValue), variableName));
+						genSet.add(new VarInterval(variableName, new Interval(
+								variableValue, variableValue)));
 					}
 				}
 				/* Create kill set for the variable definition */
-				killSet.add(new VarInterval(Interval.EMPTY, variableName));
+				killSet.add(new VarInterval(variableName, Interval.EMPTY));
 			}
 			/* This is not a local variable definition */
 			else {
@@ -152,8 +152,9 @@ class LocalIntervalsAnalysis extends ForwardFlowAnalysis {
 				if (rhs instanceof Local) {
 					VarInterval vi = flowSetContain(in, rhs.toString());
 					if (vi != null) {
-						genSet.add(new VarInterval(vi.getInterval(),
-								variableName), genSet);
+						genSet.add(
+								new VarInterval(variableName, vi.getInterval()),
+								genSet);
 						unitToGenerateSet.put(s, genSet);
 					}
 				}
@@ -170,7 +171,9 @@ class LocalIntervalsAnalysis extends ForwardFlowAnalysis {
 					else if (rhs instanceof MulExpr) {
 						Value op1 = ((MulExpr) rhs).getOp1();
 						Value op2 = ((MulExpr) rhs).getOp2();
-						/* my code here */
+						Interval i1 = getInterval(in, op1);
+						Interval i2 = getInterval(in, op2);
+
 					}
 				}
 			}
@@ -218,8 +221,8 @@ class LocalIntervalsAnalysis extends ForwardFlowAnalysis {
 			VarInterval vi1 = (VarInterval) set1Iter.next();
 			VarInterval vi2 = flowSetContain(inSet2, vi1.getVar());
 			if (vi2 != null) {
-				genIntervals.add(new VarInterval(Interval.combine(
-						vi1.getInterval(), vi2.getInterval()), vi1.getVar()));
+				genIntervals.add(new VarInterval(vi1.getVar(), Interval
+						.combine(vi1.getInterval(), vi2.getInterval())));
 			}
 		}
 		// Iterator genIter = genIntervals.iterator();
@@ -259,5 +262,20 @@ class LocalIntervalsAnalysis extends ForwardFlowAnalysis {
 			if (vi.getVar().equals(viName)) { return vi; }
 		}
 		return vi;
+	}
+
+	private Interval getInterval(FlowSet fs, Value val) {
+
+		/* Value is a constant */
+		if (val instanceof IntConstant) {
+			return new Interval(((IntConstant) val).value,
+					((IntConstant) val).value);
+		}
+		/* Value is a local */
+		else if (val instanceof Local) {
+			VarInterval vi = flowSetContain(fs, val.toString());
+			if (vi != null) { return vi.getInterval(); }
+		}
+		return null;
 	}
 }

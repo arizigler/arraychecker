@@ -3,7 +3,7 @@ public class VarInterval {
 	private String		m_var;
 	private Interval	m_interval;
 
-	public VarInterval(Interval interval, String var) {
+	public VarInterval(String var, Interval interval) {
 		m_interval = interval;
 		m_var = var;
 	}
