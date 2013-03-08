@@ -9,6 +9,11 @@ public class Interval {
 		m_lowerBound = lower;
 		m_upperBound = upper;
 	}
+	
+	public Interval(Interval inter) {
+		m_lowerBound = inter.getLowerBound();
+		m_upperBound = inter.getUpperBound();
+	}
 
 	public static Interval combine(Interval i1, Interval i2) {
 		long lower = Math.min(i1.getLowerBound(), i2.getLowerBound());

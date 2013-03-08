@@ -9,11 +9,13 @@ public class TestClass {
 		int d = a + 5;
 		Object h = new Object();
 		boolean bool = args.length == 0;
+		int e;
 		if (bool) {
-			int e = 3;
+			e = 3;
 		}
 		else {
-			int e = 4;
+			e = 4;
 		}
+		int f = e;
 	}
 }
