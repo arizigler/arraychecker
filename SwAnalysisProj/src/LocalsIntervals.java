@@ -192,8 +192,7 @@ class LocalIntervalsAnalysis extends ForwardFlowAnalysis {
 				else if (rhs instanceof NegExpr) {
 					Value op = ((NegExpr) rhs).getOp();
 					VarInterval vi = negExprInterval(variableName, op, in);
-					genSet.add(vi, genSet);
-					unitToGenerateSet.put(s, genSet);
+					genSet.add(vi);
 				}
 
 			}
@@ -201,8 +200,8 @@ class LocalIntervalsAnalysis extends ForwardFlowAnalysis {
 		}
 		/* Update output, subtract kill and add gen */
 		/* Debug prints */
-		// G.v().out.println("in= "+ in + " kill= "+
-		// unitToKillSet.get(unit)+ " gen= "+ unitToGenerateSet.get(unit));
+		 G.v().out.println("in= "+ in + " kill= "+
+		 unitToKillSet.get(unit)+ " gen= "+ unitToGenerateSet.get(unit));
 		in.difference(unitToKillSet.get(unit));
 		in.union(unitToGenerateSet.get(unit), out);
 	}
