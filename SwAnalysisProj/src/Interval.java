@@ -1,44 +1,60 @@
 public class Interval {
 
-	private long		m_lowerBound;
-	private long		m_upperBound;
-	public static long	POSITIVE_INF	= Long.MAX_VALUE;
-	public static long	NEGATIVE_INF	= Long.MIN_VALUE;
-	public static Interval  EMPTY      = new Interval(0, 0);
-	
+	private long			m_lowerBound;
+	private long			m_upperBound;
+	public static long		POSITIVE_INF	= Long.MAX_VALUE;
+	public static long		NEGATIVE_INF	= Long.MIN_VALUE;
+	public static Interval	EMPTY			= new Interval(0, 0);
+
 	public Interval(long lower, long upper) {
 		m_lowerBound = lower;
 		m_upperBound = upper;
 	}
-	
+
 	public Interval(Interval inter) {
 		m_lowerBound = inter.getLowerBound();
 		m_upperBound = inter.getUpperBound();
 	}
-
 
 	public static Interval combine(Interval i1, Interval i2) {
 		long lower = Math.min(i1.getLowerBound(), i2.getLowerBound());
 		long upper = Math.max(i1.getUpperBound(), i2.getUpperBound());
 		return new Interval(lower, upper);
 	}
-	
+
 	public static Interval addExpr(Interval i1, Interval i2) {
 		long lower = i1.getLowerBound() + i2.getLowerBound();
 		long upper = i1.getUpperBound() + i2.getUpperBound();
 		return new Interval(lower, upper);
 	}
-	
+
 	public static Interval subExpr(Interval i1, Interval i2) {
 		long lower = i1.getLowerBound() - i2.getUpperBound();
 		long upper = i1.getUpperBound() - i2.getLowerBound();
 		return new Interval(lower, upper);
 	}
+
 	public static Interval negExpr(Interval i1) {
 		long lower = -i1.getUpperBound();
 		long upper = -i1.getLowerBound();
 		return new Interval(lower, upper);
-	}	
+	}
+
+	public static Interval mul(Interval i1, Interval i2) {
+		/*
+		 * [a, b] ª [c, d] = [min (a ª c, a ª d, b ª c, b ª d), max (a ª c, a ª
+		 * d, b ª c, b ª d)]
+		 */
+		return new Interval(Math.min(
+				Math.min(i1.getLowerBound() * i2.getLowerBound(),
+						i1.getLowerBound() * i2.getUpperBound()),
+				Math.min(i1.getUpperBound() * i2.getLowerBound(),
+						i1.getUpperBound() * i2.getUpperBound())), Math.max(
+				Math.max(i1.getLowerBound() * i2.getLowerBound(),
+						i1.getLowerBound() * i2.getUpperBound()),
+				Math.max(i1.getUpperBound() * i2.getLowerBound(),
+						i1.getUpperBound() * i2.getUpperBound())));
+	}
 
 	public long getLowerBound() {
 		return m_lowerBound;
