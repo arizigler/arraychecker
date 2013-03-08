@@ -30,8 +30,8 @@ public class Interval {
 	}
 	
 	public static Interval subExpr(Interval i1, Interval i2) {
-		long lower = i1.getLowerBound() - i2.getLowerBound();
-		long upper = i1.getUpperBound() - i2.getUpperBound();
+		long lower = i1.getLowerBound() - i2.getUpperBound();
+		long upper = i1.getUpperBound() - i2.getLowerBound();
 		return new Interval(lower, upper);
 	}
 	public static Interval negExpr(Interval i1) {
