@@ -20,6 +20,8 @@
 import java.util.*;
 
 import soot.*;
+import soot.baf.AddInst;
+import soot.jimple.AddExpr;
 import soot.jimple.IntConstant;
 import soot.options.Options;
 import soot.toolkits.graph.UnitGraph;
@@ -109,7 +111,7 @@ class LocalIntervalsAnalysis extends ForwardFlowAnalysis {
 					}
 				}
 				/* Create kill set for the variable definition */
-				killSet.add(variableName, killSet);
+				killSet.add(new VarInterval(Interval.EMPTY, variableName));
 			}
 			/* This is not a local variable definition */
 			else {
@@ -166,9 +168,31 @@ class LocalIntervalsAnalysis extends ForwardFlowAnalysis {
 					}
 				}
 			}
+			else if (s.getUnitBoxes().size() ==2) {
+				G.v().out.println("****************! size 2!*******");
+			}			
+			else if (s.getUseBoxes().size() == 3) {
+				ValueBox useBox1 = (ValueBox) useBoxIter.next();
+				ValueBox useBox2 = (ValueBox) useBoxIter.next();
+				ValueBox useBox = (ValueBox) useBoxIter.next();
+				
+				if (useBox.getValue() instanceof AddExpr){
+					VarInterval vi = addExprInterval(variableName, useBox1, useBox2, in);
+					genSet.add(vi, genSet);
+					unitToGenerateSet.put(s, genSet);
+				}
+			}
+			else if (s.getUnitBoxes().size() >3) {
+				G.v().out.println("****************! Not binary expression !*******");
+			}
+			
 		}
 		// perform generation (need to subtract killSet)
+		/* Debug prints */
+		//G.v().out.println("in= "+ in + " kill= "+ unitToKillSet.get(unit)+ " gen= "+ unitToGenerateSet.get(unit));
+		in.difference(unitToKillSet.get(unit));
 		in.union(unitToGenerateSet.get(unit), out);
+
 	}
 
 	/**
@@ -262,5 +286,30 @@ class LocalIntervalsAnalysis extends ForwardFlowAnalysis {
 			}
 		}
 		return vi;
+	}
+	
+	private VarInterval addExprInterval(String defName, ValueBox useBox1, ValueBox useBox2, FlowSet in) {
+		Interval i1 = null,i2 = null;
+		if (useBox1.getValue() instanceof IntConstant) {
+			int val = ((IntConstant)useBox1.getValue()).value;
+			i1 = new Interval(val,val);
+		}
+		else if (useBox1.getValue() instanceof Local) {
+			VarInterval vi = flowSetContain(in,useBox1.getValue().toString());
+			if (vi != null) {
+				i1 = new Interval(vi.getInterval());
+			}
+		}
+		if (useBox2.getValue() instanceof IntConstant) {
+			int val = ((IntConstant)useBox2.getValue()).value;
+			i2 = new Interval(val,val);
+		}
+		else if (useBox2.getValue() instanceof Local) {
+			VarInterval vi = flowSetContain(in,useBox2.getValue().toString());
+			if (vi != null) {
+				i2 = new Interval(vi.getInterval());
+			}
+		}	
+		return new VarInterval(Interval.addExpr(i1, i2),defName);
 	}
 }
