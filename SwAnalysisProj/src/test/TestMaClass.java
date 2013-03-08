@@ -13,5 +13,6 @@ public class TestMaClass {
 		else
 			b = a + b;
 		int c = b + a;
+		int d = -b;
 	}
 }

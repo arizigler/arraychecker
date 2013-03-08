@@ -20,9 +20,13 @@
 import java.util.*;
 
 import soot.*;
+import soot.JastAddJ.AssignExpr;
 import soot.baf.AddInst;
 import soot.jimple.AddExpr;
+import soot.jimple.AssignStmt;
 import soot.jimple.IntConstant;
+import soot.jimple.NegExpr;
+import soot.jimple.SubExpr;
 import soot.options.Options;
 import soot.toolkits.graph.UnitGraph;
 import soot.toolkits.scalar.*;
@@ -146,52 +150,60 @@ class LocalIntervalsAnalysis extends ForwardFlowAnalysis {
 		FlowSet genSet = emptySet.clone();
 		
 		Unit s = (Unit) unit;
-		Iterator useBoxIter = s.getUseBoxes().iterator();
-		Iterator defBoxIter = s.getDefBoxes().iterator();
-		ValueBox defBox = null;
-		
-		if (defBoxIter.hasNext()) {
-			defBox = (ValueBox) defBoxIter.next();
-		}
-
-		if (defBox != null && defBox.getValue() instanceof Local) {
-			String variableName = defBox.getValue().toString();
-
-			if (s.getUseBoxes().size() == 1) {
-				ValueBox useBox = (ValueBox) useBoxIter.next();
-				/* Create gen set for "x = y" statements */
-				if (useBox.getValue() instanceof Local) {
-					VarInterval vi = flowSetContain(in,useBox.getValue().toString());
-					if (vi != null) {
-						genSet.add(new VarInterval(vi.getInterval(),variableName),genSet);
-						unitToGenerateSet.put(s, genSet);
-					}
-				}
-			}
-			else if (s.getUnitBoxes().size() ==2) {
-				G.v().out.println("****************! size 2!*******");
-			}			
-			else if (s.getUseBoxes().size() == 3) {
-				ValueBox useBox1 = (ValueBox) useBoxIter.next();
-				ValueBox useBox2 = (ValueBox) useBoxIter.next();
-				ValueBox useBox = (ValueBox) useBoxIter.next();
-				
-				if (useBox.getValue() instanceof AddExpr){
-					VarInterval vi = addExprInterval(variableName, useBox1, useBox2, in);
-					genSet.add(vi, genSet);
-					unitToGenerateSet.put(s, genSet);
-				}
-			}
-			else if (s.getUnitBoxes().size() >3) {
-				G.v().out.println("****************! Not binary expression !*******");
+		if (s instanceof AssignStmt) {
+			Iterator useBoxIter = s.getUseBoxes().iterator();
+			Iterator defBoxIter = s.getDefBoxes().iterator();
+			ValueBox defBox = null;
+			
+			if (defBoxIter.hasNext()) {
+				defBox = (ValueBox) defBoxIter.next();
 			}
 			
+			if (defBox != null && defBox.getValue() instanceof Local) {
+				String variableName = defBox.getValue().toString();
+				
+				
+				if (s.getUseBoxes().size() == 1) {
+					ValueBox useBox = (ValueBox) useBoxIter.next();
+					/* Create gen set for "x = y" statements */
+					if (useBox.getValue() instanceof Local) {
+						VarInterval vi = flowSetContain(in,useBox.getValue().toString());
+						if (vi != null) {
+							genSet.add(new VarInterval(vi.getInterval(),variableName),genSet);
+							unitToGenerateSet.put(s, genSet);
+						}
+					}
+				}
+				else {
+					ValueBox useBox = (ValueBox) useBoxIter.next();
+					while (useBoxIter.hasNext()) {
+						useBox = (ValueBox) useBoxIter.next();
+					}
+					if (useBox.getValue() instanceof AddExpr) {
+						VarInterval vi = addExprInterval(variableName, s.getUseBoxes(), in);
+						genSet.add(vi, genSet);
+						unitToGenerateSet.put(s, genSet);					
+					}
+					else if (useBox.getValue() instanceof NegExpr) {
+						VarInterval vi = negExprInterval(variableName, s.getUseBoxes(), in);
+						genSet.add(vi, genSet);
+						unitToGenerateSet.put(s, genSet);					
+					}
+					else if (useBox.getValue() instanceof SubExpr) {
+						VarInterval vi = subExprInterval(variableName, s.getUseBoxes(), in);
+						genSet.add(vi, genSet);
+						unitToGenerateSet.put(s, genSet);					
+					}				
+				}				
+				
+			}
+			// perform generation (need to subtract killSet)
+			/* Debug prints */
+			//G.v().out.println("in= "+ in + " kill= "+ unitToKillSet.get(unit)+ " gen= "+ unitToGenerateSet.get(unit));
+			in.difference(unitToKillSet.get(unit));
+			in.union(unitToGenerateSet.get(unit), out);
+			
 		}
-		// perform generation (need to subtract killSet)
-		/* Debug prints */
-		//G.v().out.println("in= "+ in + " kill= "+ unitToKillSet.get(unit)+ " gen= "+ unitToGenerateSet.get(unit));
-		in.difference(unitToKillSet.get(unit));
-		in.union(unitToGenerateSet.get(unit), out);
 
 	}
 
@@ -288,28 +300,43 @@ class LocalIntervalsAnalysis extends ForwardFlowAnalysis {
 		return vi;
 	}
 	
-	private VarInterval addExprInterval(String defName, ValueBox useBox1, ValueBox useBox2, FlowSet in) {
-		Interval i1 = null,i2 = null;
-		if (useBox1.getValue() instanceof IntConstant) {
-			int val = ((IntConstant)useBox1.getValue()).value;
+	private Interval getInterval(ValueBox useBox, FlowSet in) {
+		Interval i1 = null;
+		if (useBox.getValue() instanceof IntConstant) {
+			int val = ((IntConstant)useBox.getValue()).value;
 			i1 = new Interval(val,val);
 		}
-		else if (useBox1.getValue() instanceof Local) {
-			VarInterval vi = flowSetContain(in,useBox1.getValue().toString());
+		else if (useBox.getValue() instanceof Local) {
+			VarInterval vi = flowSetContain(in,useBox.getValue().toString());
 			if (vi != null) {
 				i1 = new Interval(vi.getInterval());
 			}
 		}
-		if (useBox2.getValue() instanceof IntConstant) {
-			int val = ((IntConstant)useBox2.getValue()).value;
-			i2 = new Interval(val,val);
-		}
-		else if (useBox2.getValue() instanceof Local) {
-			VarInterval vi = flowSetContain(in,useBox2.getValue().toString());
-			if (vi != null) {
-				i2 = new Interval(vi.getInterval());
-			}
-		}	
+		return i1;
+	}
+	
+	private VarInterval addExprInterval(String defName, List<ValueBox> useBoxes, FlowSet in) {
+		Iterator useBoxIter = useBoxes.iterator();
+		ValueBox useBox1 = (ValueBox) useBoxIter.next();
+		ValueBox useBox2 = (ValueBox) useBoxIter.next();		
+		Interval i1 = getInterval(useBox1,in); 
+		Interval i2 = getInterval(useBox2,in); 
 		return new VarInterval(Interval.addExpr(i1, i2),defName);
 	}
+	
+	private VarInterval subExprInterval(String defName, List<ValueBox> useBoxes, FlowSet in) {
+		Iterator useBoxIter = useBoxes.iterator();
+		ValueBox useBox1 = (ValueBox) useBoxIter.next();
+		ValueBox useBox2 = (ValueBox) useBoxIter.next();		
+		Interval i1 = getInterval(useBox1,in); 
+		Interval i2 = getInterval(useBox2,in); 
+		return new VarInterval(Interval.subExpr(i1, i2),defName);
+	}	
+	
+	private VarInterval negExprInterval(String defName, List<ValueBox> useBoxes, FlowSet in) {
+		ValueBox useBox = (ValueBox)useBoxes.iterator().next();
+		Interval i1 = getInterval(useBox,in);
+		return new VarInterval(Interval.negExpr(i1),defName);
+	}
+	
 }

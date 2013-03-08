@@ -27,6 +27,17 @@ public class Interval {
 		long upper = i1.getUpperBound() + i2.getUpperBound();
 		return new Interval(lower, upper);
 	}
+	
+	public static Interval subExpr(Interval i1, Interval i2) {
+		long lower = i1.getLowerBound() - i2.getLowerBound();
+		long upper = i1.getUpperBound() - i2.getUpperBound();
+		return new Interval(lower, upper);
+	}
+	public static Interval negExpr(Interval i1) {
+		long lower = -i1.getUpperBound();
+		long upper = -i1.getLowerBound();
+		return new Interval(lower, upper);
+	}	
 
 	public long getLowerBound() {
 		return m_lowerBound;
