@@ -190,7 +190,7 @@ class LocalIntervalsAnalysis extends ForwardFlowAnalysis {
 					}
 				}
 
-				/* Binary operations */
+				/* Unary operations */
 				// else if (rhs instanceof ???) {
 				// /* x = - a */
 				// VarInterval vi = negExprInterval(variableName,
@@ -200,14 +200,13 @@ class LocalIntervalsAnalysis extends ForwardFlowAnalysis {
 				// }
 
 			}
-			/* Update output, subtract kill and add gen */
-			/* Debug prints */
-			// G.v().out.println("in= "+ in + " kill= "+
-			// unitToKillSet.get(unit)+ " gen= "+ unitToGenerateSet.get(unit));
-			in.difference(unitToKillSet.get(unit));
-			in.union(unitToGenerateSet.get(unit), out);
-
 		}
+		/* Update output, subtract kill and add gen */
+		/* Debug prints */
+		// G.v().out.println("in= "+ in + " kill= "+
+		// unitToKillSet.get(unit)+ " gen= "+ unitToGenerateSet.get(unit));
+		in.difference(unitToKillSet.get(unit));
+		in.union(unitToGenerateSet.get(unit), out);		
 	}
 
 	/**
