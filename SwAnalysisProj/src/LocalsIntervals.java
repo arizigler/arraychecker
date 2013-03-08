@@ -21,7 +21,7 @@ import java.util.*;
 
 import soot.*;
 import soot.jimple.IntConstant;
-import soot.options.Options;
+import soot.jimple.MulExpr;
 import soot.toolkits.graph.UnitGraph;
 import soot.toolkits.scalar.*;
 
@@ -32,10 +32,6 @@ public class LocalsIntervals {
 	protected Map<Unit, List>	unitToLocalsAfter;
 
 	public LocalsIntervals(UnitGraph graph) {
-		if (Options.v().verbose()) G.v().out.println("["
-				+ graph.getBody().getMethod().getName()
-				+ "]     Constructing GuaranteedDefs...");
-
 		LocalIntervalsAnalysis analysis = new LocalIntervalsAnalysis(graph);
 
 		// Build unitToLocals map
@@ -104,11 +100,11 @@ class LocalIntervalsAnalysis extends ForwardFlowAnalysis {
 					if (useBox.getValue() instanceof IntConstant) {
 						int variableValue = ((IntConstant) useBox.getValue()).value;
 						genSet.add(new VarInterval(new Interval(variableValue,
-								variableValue), variableName), genSet);
+								variableValue), variableName));
 					}
 				}
 				/* Create kill set for the variable definition */
-				killSet.add(variableName, killSet);
+				killSet.add(new VarInterval(Interval.EMPTY, variableName));
 			}
 			/* This is not a local variable definition */
 			else {
@@ -143,6 +139,7 @@ class LocalIntervalsAnalysis extends ForwardFlowAnalysis {
 		FlowSet genSet = emptySet.clone();
 
 		Unit s = (Unit) unit;
+
 		Iterator useBoxIter = s.getUseBoxes().iterator();
 		Iterator defBoxIter = s.getDefBoxes().iterator();
 		ValueBox defBox = null;
@@ -167,7 +164,15 @@ class LocalIntervalsAnalysis extends ForwardFlowAnalysis {
 					}
 				}
 			}
+			while (useBoxIter.hasNext()) {
+				ValueBox useBox = (ValueBox) useBoxIter.next();
+				if (useBox instanceof MulExpr) {
+					VarInterval vi = flowSetContain(in, useBox.getValue()
+							.toString());
+				}
+			}
 		}
+
 		// perform generation (need to subtract killSet)
 		in.union(unitToGenerateSet.get(unit), out);
 	}

@@ -1,24 +1,26 @@
 public class Interval {
 
-	private long		m_lowerBound;
-	private long		m_upperBound;
-	public static long	POSITIVE_INF	= Long.MAX_VALUE;
-	public static long	NEGATIVE_INF	= Long.MIN_VALUE;
+	public static long		POSITIVE_INF	= Long.MAX_VALUE;
+	public static long		NEGATIVE_INF	= Long.MIN_VALUE;
+	public static Interval	EMPTY			= new Interval(0, 0);
 
-	public Interval(long lower, long upper) {
-		m_lowerBound = lower;
-		m_upperBound = upper;
-	}
-	
-	public Interval(Interval inter) {
-		m_lowerBound = inter.getLowerBound();
-		m_upperBound = inter.getUpperBound();
-	}
+	private long			m_lowerBound;
+	private long			m_upperBound;
 
 	public static Interval combine(Interval i1, Interval i2) {
 		long lower = Math.min(i1.getLowerBound(), i2.getLowerBound());
 		long upper = Math.max(i1.getUpperBound(), i2.getUpperBound());
 		return new Interval(lower, upper);
+	}
+
+	public Interval(long lower, long upper) {
+		m_lowerBound = lower;
+		m_upperBound = upper;
+	}
+
+	public Interval(Interval inter) {
+		m_lowerBound = inter.getLowerBound();
+		m_upperBound = inter.getUpperBound();
 	}
 
 	public long getLowerBound() {
