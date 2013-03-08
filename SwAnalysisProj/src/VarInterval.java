@@ -22,8 +22,7 @@ public class VarInterval {
 
 	@Override
 	public String toString() {
-		return "(" + m_var + ", [" + this.m_interval.getLowerBound() + ","
-				+ this.m_interval.getUpperBound() + "])";
+		return "(" + m_var + "," + this.m_interval.toString() + ")";
 	}
 
 	@Override

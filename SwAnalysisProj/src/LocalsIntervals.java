@@ -196,15 +196,16 @@ class LocalIntervalsAnalysis extends ForwardFlowAnalysis {
 				}
 			}
 		}
-		/* Update output, subtract kill and add gen */
+
 		/* Debug prints */
-		G.v().out.println("in= " + in + " kill= " + unitToKillSet.get(unit)
-				+ " gen= " + unitToGenerateSet.get(unit));
+		// G.v().out.println("in= " + in + " kill= " + unitToKillSet.get(unit)
+		// + " gen= " + unitToGenerateSet.get(unit));
 
 		if (!genSet.isEmpty()) {
 			unitToGenerateSet.put(s, genSet);
 		}
 
+		/* Update output, subtract kill and add gen */
 		in.difference(unitToKillSet.get(unit));
 		in.union(unitToGenerateSet.get(unit), out);
 	}
