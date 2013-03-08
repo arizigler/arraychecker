@@ -170,15 +170,9 @@ class LocalIntervalsAnalysis extends ForwardFlowAnalysis {
 					}
 
 					/* x = a - b */
-<<<<<<< HEAD
-					else if (rhs instanceof AddExpr) {
-						Value op1 = ((AddExpr) rhs).getOp1();
-						Value op2 = ((AddExpr) rhs).getOp2();
-=======
-					if (rhs instanceof SubExpr) {
+					else if (rhs instanceof SubExpr) {
 						Value op1 = ((SubExpr) rhs).getOp1();
 						Value op2 = ((SubExpr) rhs).getOp2();
->>>>>>> f131a9b6ff7978b2df041fe11dd172529cc2ec96
 						VarInterval vi = subExprInterval(variableName, op1,
 								op2, in);
 						genSet.add(vi);
@@ -195,12 +189,12 @@ class LocalIntervalsAnalysis extends ForwardFlowAnalysis {
 				}
 
 				/* Unary operations */
-				 else if (rhs instanceof NegExpr) {
-					 Value op = ((NegExpr) rhs).getOp();
-					 VarInterval vi = negExprInterval(variableName, op, in);
-					 genSet.add(vi, genSet);
-					 unitToGenerateSet.put(s, genSet);
-				 }
+				else if (rhs instanceof NegExpr) {
+					Value op = ((NegExpr) rhs).getOp();
+					VarInterval vi = negExprInterval(variableName, op, in);
+					genSet.add(vi, genSet);
+					unitToGenerateSet.put(s, genSet);
+				}
 
 			}
 			unitToGenerateSet.put(s, genSet);
