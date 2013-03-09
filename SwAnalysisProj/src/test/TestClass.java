@@ -4,7 +4,7 @@ public class TestClass {
 
 	public static void main(String[] args) {
 		int a = 2;
-		while (true) {
+		for (int i = 0; i < 5; i++) {
 			a = a + 1;
 		}
 
