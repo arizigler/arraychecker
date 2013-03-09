@@ -43,12 +43,13 @@ public class ArrayBoundsCheck {
 
 		Iterator unitIter = graph.iterator();
 
+		/* Iterating over CFG for illegal array access */
 		while (unitIter.hasNext()) {
 			Unit s = (Unit) unitIter.next();
 
 			Stmt stmt = (Stmt) s;
 
-			/* statement contains an array reference */
+			/* Statement contains an array reference */
 			if (stmt.containsArrayRef()) {
 
 				ArrayRef aref = stmt.getArrayRef();
@@ -85,14 +86,6 @@ public class ArrayBoundsCheck {
 				}
 			}
 		}
-	}
-
-	public List getLiveLocalsAfter(Unit s) {
-		return unitToLocalsAfter.get(s);
-	}
-
-	public List getLiveLocalsBefore(Unit s) {
-		return unitToLocalsBefore.get(s);
 	}
 
 }
