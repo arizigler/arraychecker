@@ -1,3 +1,4 @@
+package intervals;
 public class Interval {
 
 	private long			m_lowerBound;

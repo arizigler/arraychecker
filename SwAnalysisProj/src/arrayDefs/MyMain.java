@@ -1,3 +1,5 @@
+package arrayDefs;
+
 /* Soot - a J*va Optimization Framework
  * Copyright (C) 2008 Eric Bodden
  *
@@ -29,7 +31,7 @@ public class MyMain {
 
 					protected void internalTransform(Body body, String phase,
 							Map options) {
-						new LocalsIntervals(new ExceptionalUnitGraph(body));
+						new LocalArrayDefs(new ExceptionalUnitGraph(body));
 						// use G.v().out instead of System.out so that Soot can
 						// redirect this output to the Eclipse console
 						G.v().out.println(body.getMethod());

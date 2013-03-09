@@ -1,3 +1,5 @@
+package intervals;
+
 /* Soot - a J*va Optimization Framework
  * Copyright (C) 2003 Navindra Umanee <navindra@cs.mcgill.ca>
  *
@@ -25,12 +27,12 @@ import soot.toolkits.graph.UnitGraph;
 import soot.toolkits.scalar.*;
 
 @SuppressWarnings({ "unchecked", "rawtypes" })
-public class LocalsIntervals {
+public class LocalsInterval {
 
 	protected Map<Unit, List>	unitToLocalsBefore;
 	protected Map<Unit, List>	unitToLocalsAfter;
 
-	public LocalsIntervals(UnitGraph graph) {
+	public LocalsInterval(UnitGraph graph) {
 		LocalIntervalsAnalysis analysis = new LocalIntervalsAnalysis(graph);
 
 		// Build unitToLocals map
@@ -52,12 +54,12 @@ public class LocalsIntervals {
 		}
 	}
 
-	public List getLiveLocalsAfter(Unit s) {
-		return unitToLocalsAfter.get(s);
+	public List getLocalsIntervalBefore(Unit s) {
+		return unitToLocalsBefore.get(s);
 	}
 
-	public List getLiveLocalsBefore(Unit s) {
-		return unitToLocalsBefore.get(s);
+	public List getLocalsIntervalAfter(Unit s) {
+		return unitToLocalsAfter.get(s);
 	}
 }
 
@@ -89,7 +91,6 @@ class LocalIntervalsAnalysis extends ForwardFlowAnalysis {
 				defBox = (ValueBox) defBoxIter.next();
 			}
 
-			/* Create gen and kill sets */
 			if (defBox != null && defBox.getValue() instanceof Local) {
 				String variableName = defBox.getValue().toString();
 
@@ -216,8 +217,8 @@ class LocalIntervalsAnalysis extends ForwardFlowAnalysis {
 		}
 
 		/* Update output, subtract kill and add gen */
-		in.difference(unitToKillSet.get(unit));
-		in.union(unitToGenerateSet.get(unit), out);
+		in.difference(unitToKillSet.get(s));
+		in.union(unitToGenerateSet.get(s), out);
 
 		/* Debug prints */
 		// G.v().out.println("in= " + in + " kill= " + unitToKillSet.get(unit)
@@ -278,13 +279,9 @@ class LocalIntervalsAnalysis extends ForwardFlowAnalysis {
 		// + v.getInterval().toString());
 		// }
 
-		/* outSet = (inSet1 - inSet2) */
-		inSet1.difference(inSet2, outSet);
-		/* inSet2 = (inSet2 - inSet1) */
-		inSet2.difference(inSet1);
-		/* update outSet to contain all different elements from inSet1, inSet2 */
-		outSet.union(inSet2, outSet);
-
+		/* outSet = (inSet1 U inSet2) */
+		inSet1.union(inSet2, outSet);
+		/* remove combined intervals from outSet */
 		outSet.difference(killIntervals);
 		/* add to outSet the combined intervals of the common variables */
 		genIntervals.union(outSet, outSet);
