@@ -1,3 +1,4 @@
+package intervals;
 /* Soot - a J*va Optimization Framework
  * Copyright (C) 2003 Navindra Umanee <navindra@cs.mcgill.ca>
  *
@@ -25,12 +26,12 @@ import soot.toolkits.graph.UnitGraph;
 import soot.toolkits.scalar.*;
 
 @SuppressWarnings({ "unchecked", "rawtypes" })
-public class LocalsIntervals {
+public class LocalsInterval {
 
 	protected Map<Unit, List>	unitToLocalsBefore;
 	protected Map<Unit, List>	unitToLocalsAfter;
 
-	public LocalsIntervals(UnitGraph graph) {
+	public LocalsInterval(UnitGraph graph) {
 		LocalIntervalsAnalysis analysis = new LocalIntervalsAnalysis(graph);
 
 		// Build unitToLocals map

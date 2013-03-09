@@ -1,3 +1,4 @@
+package intervals;
 import soot.G;
 
 public class Interval {

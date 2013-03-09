@@ -1,3 +1,4 @@
+package intervals;
 public class VarInterval {
 
 	private String		m_var;
