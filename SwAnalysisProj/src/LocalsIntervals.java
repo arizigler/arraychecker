@@ -363,6 +363,6 @@ class LocalIntervalsAnalysis extends ForwardFlowAnalysis {
 			FlowSet in) {
 		Interval i1 = getInterval(op1, in);
 		Interval i2 = getInterval(op2, in);
-		return new VarInterval(defName, Interval.mul(i1, i2));	
+		return new VarInterval(defName, Interval.div(i1, i2));	
 	}
 }

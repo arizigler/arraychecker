@@ -60,15 +60,32 @@ public class Interval {
 						i1.getUpperBound() * i2.getUpperBound())));
 	}
 	
-//	public static Interval div(Interval i1, Interval i2) {
-//		long l1 = i1.getLowerBound(), l2 = i2.getLowerBound();
-//		long u1 = i1.getUpperBound(), u2 = i2.getUpperBound();
-//		long lower, upper;
-//		if (l2 != 0 && u2 !=0) 
-//			return new Interval(Math.min(Math.min(l1/l2,l1/u2),Math.min(u1/l2,u1/u2)),
-//								Math.max(Math.max(l1/l2,l1/u2),Math.max(u1/l2,u1/u2)));
-//		
-//	}
+	public static Interval div(Interval i1, Interval i2) {
+		long l1 = i1.getLowerBound(), l2 = i2.getLowerBound();
+		long u1 = i1.getUpperBound(), u2 = i2.getUpperBound();
+		if (l2 != 0 && u2 !=0) 
+			return new Interval(Math.min(Math.min(l1/l2,l1/u2),Math.min(u1/l2,u1/u2)),
+								Math.max(Math.max(l1/l2,l1/u2),Math.max(u1/l2,u1/u2)));
+		if (l2 == 0 && u2 == 0) {
+			if (l1 >= 0 && u1 >= 0)
+				return new Interval(POSITIVE_INF, POSITIVE_INF);
+			if (l1 < 0 && u1 < 0)
+				return new Interval(NEGATIVE_INF,NEGATIVE_INF);
+		}
+		if (l2 == 0 && u2 != 0) {
+			if (l1 >= 0 && u1 >=0)
+				return new Interval(Math.min(l1/u2, u1/u2),POSITIVE_INF);
+			if (l1 < 0 && u1 < 0)
+				return new Interval(NEGATIVE_INF, Math.max(l1/u2, u1/u2));
+		}
+		if (l2 != 0 && u2 == 0) {
+			if (l1 >= 0 && u1 >=0)
+				return new Interval(Math.min(l1/l2, u1/l2),POSITIVE_INF);
+			if (l1 < 0 && u1 < 0)
+				return new Interval(NEGATIVE_INF, Math.max(l1/l2, u1/l2));
+		}
+		return new Interval(NEGATIVE_INF, POSITIVE_INF);
+	}
 
 	public long getLowerBound() {
 		return m_lowerBound;
