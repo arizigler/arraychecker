@@ -179,7 +179,7 @@ public class Interval {
 		}
 		return new Interval(NEGATIVE_INF, POSITIVE_INF);
 	}
-
+	
 	public long getLowerBound() {
 		return m_lowerBound;
 	}

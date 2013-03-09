@@ -60,6 +60,14 @@ public class LocalsInterval {
 	public List getLiveLocalsBefore(Unit s) {
 		return unitToLocalsBefore.get(s);
 	}
+	
+	public List getLocalsIntervalBefore(Unit s) {
+		return unitToLocalsBefore.get(s);
+	}
+
+	public List getLocalsIntervalAfter(Unit s) {
+		return unitToLocalsAfter.get(s);
+	}	
 }
 
 @SuppressWarnings({ "unchecked", "rawtypes" })
@@ -280,13 +288,9 @@ class LocalIntervalsAnalysis extends ForwardFlowAnalysis {
 		// + v.getInterval().toString());
 		// }
 
-		/* outSet = (inSet1 - inSet2) */
-		inSet1.difference(inSet2, outSet);
-		/* inSet2 = (inSet2 - inSet1) */
-		inSet2.difference(inSet1);
-		/* update outSet to contain all different elements from inSet1, inSet2 */
-		outSet.union(inSet2, outSet);
-
+		/* outSet = (inSet1 U inSet2) */
+		inSet1.union(inSet2, outSet);
+		/* remove combined intervals from outSet */
 		outSet.difference(killIntervals);
 		/* add to outSet the combined intervals of the common variables */
 		genIntervals.union(outSet, outSet);
@@ -359,4 +363,11 @@ class LocalIntervalsAnalysis extends ForwardFlowAnalysis {
 		Interval i2 = getInterval(op2, in);
 		return new VarInterval(defName, Interval.div(i1, i2));	
 	}
+
+
+
+
+
+
+
 }
