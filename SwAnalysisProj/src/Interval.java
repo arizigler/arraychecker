@@ -83,4 +83,24 @@ public class Interval {
 	public String toString() {
 		return "[" + m_lowerBound + "," + m_upperBound + "]";
 	}
+
+	@Override
+	public int hashCode() {
+		final int prime = 31;
+		int result = 1;
+		result = prime * result + (int) (m_lowerBound ^ (m_lowerBound >>> 32));
+		result = prime * result + (int) (m_upperBound ^ (m_upperBound >>> 32));
+		return result;
+	}
+
+	// @Override
+	// public boolean equals(Object obj) {
+	// if (this == obj) return true;
+	// if (obj == null) return false;
+	// if (getClass() != obj.getClass()) return false;
+	// Interval other = (Interval) obj;
+	// if (m_lowerBound != other.m_lowerBound) return false;
+	// if (m_upperBound != other.m_upperBound) return false;
+	// return true;
+	// }
 }
