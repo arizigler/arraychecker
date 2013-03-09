@@ -1,4 +1,4 @@
-package arrayDefs;
+package arraydefs;
 
 public class ArrayDef {
 

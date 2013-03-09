@@ -1,4 +1,4 @@
-package arrayDefs;
+package arraydefs;
 
 /* Soot - a J*va Optimization Framework
  * Copyright (C) 2003 Navindra Umanee <navindra@cs.mcgill.ca>
@@ -35,8 +35,9 @@ public class LocalArrayDefs {
 	protected Map<Unit, List>	unitToLocalsBefore;
 	protected Map<Unit, List>	unitToLocalsAfter;
 
-	public LocalArrayDefs(UnitGraph graph) {
-		LocalArrayDefsAnalysis analysis = new LocalArrayDefsAnalysis(graph);
+	public LocalArrayDefs(UnitGraph graph, LocalsInterval intervalAnalysis) {
+		LocalArrayDefsAnalysis analysis = new LocalArrayDefsAnalysis(graph,
+				intervalAnalysis);
 
 		// Build unitToLocals map
 		unitToLocalsAfter = new HashMap<Unit, List>(graph.size() * 2 + 1, 0.7f);
@@ -57,29 +58,42 @@ public class LocalArrayDefs {
 		}
 	}
 
-	public List getLiveLocalsAfter(Unit s) {
+	public List getArrayDefsBefore(Unit s) {
+		return unitToLocalsBefore.get(s);
+	}
+
+	public List getArrayDefsAfter(Unit s) {
 		return unitToLocalsAfter.get(s);
 	}
 
-	public List getLiveLocalsBefore(Unit s) {
-		return unitToLocalsBefore.get(s);
+	public ArrayDef getArrayDefBefore(Unit s, String arrayName) {
+		Iterator arrDefsIter = getArrayDefsBefore(s).iterator();
+		ArrayDef ad = null;
+
+		while (arrDefsIter.hasNext()) {
+			ad = (ArrayDef) arrDefsIter.next();
+			if (ad.getName().equals(arrayName)) { return ad; }
+		}
+		return null;
 	}
 }
 
 @SuppressWarnings({ "unchecked", "rawtypes" })
 class LocalArrayDefsAnalysis extends ForwardFlowAnalysis {
 
-	FlowSet				emptySet			= new ArraySparseSet();
-	Map<Unit, FlowSet>	unitToGenerateSet	= new HashMap<Unit, FlowSet>(
-													graph.size() * 2 + 1, 0.7f);
-	Map<Unit, FlowSet>	unitToKillSet		= new HashMap<Unit, FlowSet>(
-													graph.size() * 2 + 1, 0.7f);
+	private FlowSet				emptySet			= new ArraySparseSet();
+	private Map<Unit, FlowSet>	unitToGenerateSet	= new HashMap<Unit, FlowSet>(
+															graph.size() * 2 + 1,
+															0.7f);
+	private Map<Unit, FlowSet>	unitToKillSet		= new HashMap<Unit, FlowSet>(
+															graph.size() * 2 + 1,
+															0.7f);
 
-	LocalArrayDefsAnalysis(UnitGraph graph) {
+	LocalArrayDefsAnalysis(UnitGraph graph, LocalsInterval analysis) {
 		super(graph);
 		Iterator unitIt = graph.iterator();
 
-		LocalsInterval analysis = new LocalsInterval(graph);
+		// LocalsInterval analysis = new LocalsInterval(graph);
 
 		/* Create gen and kill sets */
 		while (unitIt.hasNext()) {

@@ -61,6 +61,19 @@ public class LocalsInterval {
 	public List getLocalsIntervalAfter(Unit s) {
 		return unitToLocalsAfter.get(s);
 	}
+
+	public Interval getVarIntervalBefore(Unit s, String var) {
+
+		Iterator intervalsIter = getLocalsIntervalBefore(s).iterator();
+		VarInterval vi = null;
+
+		while (intervalsIter.hasNext()) {
+			vi = (VarInterval) intervalsIter.next();
+			if (vi.getVar().equals(var)) return vi.getInterval();
+		}
+
+		return null;
+	}
 }
 
 @SuppressWarnings({ "unchecked", "rawtypes" })

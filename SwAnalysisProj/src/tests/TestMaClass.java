@@ -1,4 +1,4 @@
-package test;
+package tests;
 public class TestMaClass {
 
 	public static void main(String[] args) {

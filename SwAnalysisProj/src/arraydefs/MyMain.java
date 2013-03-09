@@ -1,4 +1,4 @@
-package arrayDefs;
+package arraydefs;
 
 /* Soot - a J*va Optimization Framework
  * Copyright (C) 2008 Eric Bodden
@@ -18,6 +18,8 @@ package arrayDefs;
  * Free Software Foundation, Inc., 59 Temple Place - Suite 330,
  * Boston, MA 02111-1307, USA.
  */
+import intervals.LocalsInterval;
+
 import java.util.Map;
 
 import soot.*;
@@ -31,7 +33,9 @@ public class MyMain {
 
 					protected void internalTransform(Body body, String phase,
 							Map options) {
-						new LocalArrayDefs(new ExceptionalUnitGraph(body));
+						new LocalArrayDefs(new ExceptionalUnitGraph(body),
+								new LocalsInterval(new ExceptionalUnitGraph(
+										body)));
 						// use G.v().out instead of System.out so that Soot can
 						// redirect this output to the Eclipse console
 						G.v().out.println(body.getMethod());
