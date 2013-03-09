@@ -137,6 +137,7 @@ class LocalIntervalsAnalysis extends ForwardFlowAnalysis {
 
 		FlowSet in = (FlowSet) inValue, out = (FlowSet) outValue;
 		FlowSet genSet = emptySet.clone();
+		FlowSet killSet = emptySet.clone();
 
 		Unit s = (Unit) unit;
 
@@ -147,6 +148,15 @@ class LocalIntervalsAnalysis extends ForwardFlowAnalysis {
 
 			if (lhs instanceof Local) {
 				String variableName = lhs.toString();
+
+				/* Kill previous interval */
+				VarInterval viToKill = flowSetContain(in, variableName);
+				if (viToKill != null) {
+					killSet.add(viToKill);
+					killSet.union(unitToKillSet.get(s));
+
+					unitToKillSet.put(s, killSet);
+				}
 
 				/* x = y */
 				if (rhs instanceof Local) {
@@ -204,17 +214,22 @@ class LocalIntervalsAnalysis extends ForwardFlowAnalysis {
 				}
 			}
 		}
-		/* Update output, subtract kill and add gen */
-		/* Debug prints */
-		G.v().out.println("in= " + in + " kill= " + unitToKillSet.get(unit)
-				+ " gen= " + unitToGenerateSet.get(unit));
 
 		if (!genSet.isEmpty()) {
 			unitToGenerateSet.put(s, genSet);
 		}
 
+		if (!killSet.isEmpty()) {
+			unitToKillSet.put(s, killSet);
+		}
+
+		/* Update output, subtract kill and add gen */
 		in.difference(unitToKillSet.get(unit));
 		in.union(unitToGenerateSet.get(unit), out);
+
+		/* Debug prints */
+		// G.v().out.println("in= " + in + " kill= " + unitToKillSet.get(unit)
+		// + " gen= " + unitToGenerateSet.get(unit) + " out=" + out);
 	}
 
 	/**
@@ -223,6 +238,7 @@ class LocalIntervalsAnalysis extends ForwardFlowAnalysis {
 	protected void merge(Object in1, Object in2, Object out) {
 		FlowSet inSet1 = (FlowSet) in1, inSet2 = (FlowSet) in2, outSet = (FlowSet) out;
 		FlowSet genIntervals = emptySet.clone();
+		FlowSet killIntervals = emptySet.clone();
 
 		Iterator set1Iter = inSet1.iterator();
 		// Iterator set2Iter = inSet2.iterator();
@@ -256,6 +272,8 @@ class LocalIntervalsAnalysis extends ForwardFlowAnalysis {
 			if (vi2 != null) {
 				genIntervals.add(new VarInterval(vi1.getVar(), Interval
 						.combine(vi1.getInterval(), vi2.getInterval())));
+				killIntervals.add(vi1);
+				killIntervals.add(vi2);
 			}
 		}
 
@@ -274,6 +292,8 @@ class LocalIntervalsAnalysis extends ForwardFlowAnalysis {
 		inSet2.difference(inSet1);
 		/* update outSet to contain all different elements from inSet1, inSet2 */
 		outSet.union(inSet2, outSet);
+
+		outSet.difference(killIntervals);
 		/* add to outSet the combined intervals of the common variables */
 		genIntervals.union(outSet, outSet);
 	}
@@ -295,7 +315,7 @@ class LocalIntervalsAnalysis extends ForwardFlowAnalysis {
 			vi = (VarInterval) fsIter.next();
 			if (vi.getVar().equals(viName)) { return vi; }
 		}
-		return vi;
+		return null;
 	}
 
 	private Interval getInterval(Value val, FlowSet fs) {
