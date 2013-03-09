@@ -186,6 +186,14 @@ class LocalIntervalsAnalysis extends ForwardFlowAnalysis {
 								op2, in);
 						genSet.add(vi);
 					}
+					
+					else if (rhs instanceof DivExpr) {
+						Value op1 = ((DivExpr) rhs).getOp1();
+						Value op2 = ((DivExpr) rhs).getOp2();
+						VarInterval vi = divExprInterval(variableName, op1,
+								op2, in);
+						genSet.add(vi);						
+					}
 				}
 
 				/* Unary operations */
@@ -330,5 +338,11 @@ class LocalIntervalsAnalysis extends ForwardFlowAnalysis {
 		Interval i2 = getInterval(op2, in);
 		return new VarInterval(defName, Interval.mul(i1, i2));
 	}
-
+	
+	private VarInterval divExprInterval(String defName, Value op1, Value op2,
+			FlowSet in) {
+		Interval i1 = getInterval(op1, in);
+		Interval i2 = getInterval(op2, in);
+		return new VarInterval(defName, Interval.mul(i1, i2));	
+	}
 }

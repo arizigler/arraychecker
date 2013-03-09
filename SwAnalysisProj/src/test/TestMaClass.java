@@ -2,7 +2,15 @@ package test;
 public class TestMaClass {
 
 	public static void main(String[] args) {
-		int a = 1 ;
+		int a = 1;
+		int b = 5; 
+		while (a <= b) {
+			a++;
+		}
+		int c = a;
+		
+		
+//		int a = 1 ;
 //		int b = 2;
 //		b += 1;
 //		b++;

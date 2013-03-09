@@ -17,24 +17,28 @@ public class Interval {
 	}
 
 	public static Interval combine(Interval i1, Interval i2) {
+		/* [a,b] U [c,d] =  [min(a,c), max(b,d)] */ 		
 		long lower = Math.min(i1.getLowerBound(), i2.getLowerBound());
 		long upper = Math.max(i1.getUpperBound(), i2.getUpperBound());
 		return new Interval(lower, upper);
 	}
 
 	public static Interval addExpr(Interval i1, Interval i2) {
+		/* [a,b] + [c,d] =  [a + c, b + d] */ 		
 		long lower = i1.getLowerBound() + i2.getLowerBound();
 		long upper = i1.getUpperBound() + i2.getUpperBound();
 		return new Interval(lower, upper);
 	}
 
 	public static Interval subExpr(Interval i1, Interval i2) {
+		/* [a,b] - [c,d] =  [a âˆ’ d, b âˆ’ c] */
 		long lower = i1.getLowerBound() - i2.getUpperBound();
 		long upper = i1.getUpperBound() - i2.getLowerBound();
 		return new Interval(lower, upper);
 	}
 
 	public static Interval negExpr(Interval i1) {
+		/* -[a,b] =  [âˆ’b, -a] */
 		long lower = -i1.getUpperBound();
 		long upper = -i1.getLowerBound();
 		return new Interval(lower, upper);
@@ -42,8 +46,8 @@ public class Interval {
 
 	public static Interval mul(Interval i1, Interval i2) {
 		/*
-		 * [a, b] ª [c, d] = [min (a ª c, a ª d, b ª c, b ª d), max (a ª c, a ª
-		 * d, b ª c, b ª d)]
+		 * [a, b] Ã— [c, d] = [min (a Ã— c, a Ã— d, b Ã— c, b Ã— d), max (a Ã— c, a Ã—
+		 * d, b Ã— c, b Ã— d)]
 		 */
 		return new Interval(Math.min(
 				Math.min(i1.getLowerBound() * i2.getLowerBound(),
@@ -55,6 +59,16 @@ public class Interval {
 				Math.max(i1.getUpperBound() * i2.getLowerBound(),
 						i1.getUpperBound() * i2.getUpperBound())));
 	}
+	
+//	public static Interval div(Interval i1, Interval i2) {
+//		long l1 = i1.getLowerBound(), l2 = i2.getLowerBound();
+//		long u1 = i1.getUpperBound(), u2 = i2.getUpperBound();
+//		long lower, upper;
+//		if (l2 != 0 && u2 !=0) 
+//			return new Interval(Math.min(Math.min(l1/l2,l1/u2),Math.min(u1/l2,u1/u2)),
+//								Math.max(Math.max(l1/l2,l1/u2),Math.max(u1/l2,u1/u2)));
+//		
+//	}
 
 	public long getLowerBound() {
 		return m_lowerBound;
