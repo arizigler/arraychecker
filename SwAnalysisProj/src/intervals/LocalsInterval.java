@@ -109,22 +109,22 @@ class LocalIntervalsAnalysis extends ForwardFlowAnalysis {
 			FlowSet genSet = emptySet.clone();
 			FlowSet killSet = emptySet.clone();
 
-			if (s instanceof AssignStmt) {
-				Value lhs = ((AssignStmt) s).getLeftOp();
-				Value rhs = ((AssignStmt) s).getRightOp();
-
-				if (lhs instanceof Local && rhs instanceof IntConstant) genSet
-						.add(new VarInterval(lhs.toString(), new Interval(
-								((IntConstant) rhs).value,
-								((IntConstant) rhs).value)));
-
-				/* Create kill set for the variable definition */
-				killSet.add(new VarInterval(lhs.toString(), Interval.EMPTY));
-			}
-			/* This is not a local variable definition */
-			else {
-				/* nothing to do */
-			}
+//			if (s instanceof AssignStmt) {
+//				Value lhs = ((AssignStmt) s).getLeftOp();
+//				Value rhs = ((AssignStmt) s).getRightOp();
+//
+//				if (lhs instanceof Local && rhs instanceof IntConstant) genSet
+//						.add(new VarInterval(lhs.toString(), new Interval(
+//								((IntConstant) rhs).value,
+//								((IntConstant) rhs).value)));
+//
+//				/* Create kill set for the variable definition */
+//				killSet.add(new VarInterval(lhs.toString(), Interval.EMPTY));
+//			}
+//			/* This is not a local variable definition */
+//			else {
+//				/* nothing to do */
+//			}
 			unitToGenerateSet.put(s, genSet);
 			unitToKillSet.put(s, killSet);
 		}
@@ -177,8 +177,14 @@ class LocalIntervalsAnalysis extends ForwardFlowAnalysis {
 				}
 				VarInterval vi = null;
 
+				/* x = const */
+				if (rhs instanceof IntConstant) {
+					vi = new VarInterval(variableName, 
+										 new Interval(((IntConstant) rhs).value,((IntConstant) rhs).value));
+				}
+
 				/* x = y */
-				if (rhs instanceof Local || rhs instanceof ArrayRef) {
+				else if (rhs instanceof Local || rhs instanceof ArrayRef) {
 					VarInterval rhsVi = flowSetContain(in, rhs.toString());
 					//TODO : maybe assert in case it null (only for local)
 					if (rhsVi != null) {
