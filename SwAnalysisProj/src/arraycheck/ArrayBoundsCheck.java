@@ -33,13 +33,19 @@ import arraydefs.LocalArrayDefs;
 @SuppressWarnings({ "rawtypes" })
 public class ArrayBoundsCheck {
 
-	protected Map<Unit, List>	unitToLocalsBefore;
-	protected Map<Unit, List>	unitToLocalsAfter;
+	protected Map<Unit, String>	unitToIllegalAccess;
+	private static String		unsafeLower		= "Unsafe Array Access: Illegal Lower Bound";
+	private static String		unsafeUpper		= "Unsafe Array Access: Illegal Upper Bound";
+	private static String		pUnsafeLower	= "Unsafe Array Access: Potentially Illegal Lower Bound";
+	private static String		pUnsafeUpper	= "Unsafe Array Access: Potentially Illegal Upper Bound";
 
 	public ArrayBoundsCheck(UnitGraph graph) {
 
 		LocalsInterval intAnalysis = new LocalsInterval(graph);
 		LocalArrayDefs arrDefAnalysis = new LocalArrayDefs(graph, intAnalysis);
+
+		unitToIllegalAccess = new HashMap<Unit, String>(graph.size() * 2 + 1,
+				0.7f);
 
 		Iterator unitIter = graph.iterator();
 
@@ -50,7 +56,6 @@ public class ArrayBoundsCheck {
 
 			/* Statement contains an array reference */
 			if (stmt.containsArrayRef()) {
-				/* TODO: fix to take care all array refs */
 
 				ArrayRef aref = stmt.getArrayRef();
 
@@ -58,7 +63,8 @@ public class ArrayBoundsCheck {
 				ArrayDef arrayDef = arrDefAnalysis.getArrayDefBefore(s,
 						arrayName);
 
-				Value index = aref.getIndex();
+				ValueBox indexBox = aref.getIndexBox();
+				Value index = indexBox.getValue();
 
 				/* array[i] */
 				if (index instanceof Local) {
@@ -68,24 +74,60 @@ public class ArrayBoundsCheck {
 							s, indexVarName);
 
 					if (arrayDef != null && indexInterval != null) {
-						G.v().out.println("WARNING: array size is: "
-								+ arrayDef.getSize() + ", however " + arrayName
-								+ " index is in the interval: "
-								+ indexInterval.toString());
+
+						Interval arraySizeInterval = arrayDef.getInterval();
+
+						/* array size interval [a,b] => [0,a-1] */
+						Interval arraySizeMinInterval = Interval
+								.toMinArrayIndex(arraySizeInterval);
+
+						/* array size interval [a,b] => [0,b-1] */
+						Interval arraySizeMaxInterval = Interval
+								.toMaxArrayIndex(arraySizeInterval);
+
+						/* Definite illegal access */
+						if (!Interval.intersect(indexInterval,
+								arraySizeMaxInterval)) {
+
+							/* Definite illegal access by lower bound */
+							if (Interval.isBefore(indexInterval,
+									arraySizeMaxInterval)) {
+								unitToIllegalAccess.put(s, unsafeLower);
+							}
+							/* Definite illegal access by upper bound */
+							else {
+								unitToIllegalAccess.put(s, unsafeUpper);
+							}
+						}
+
+						/* Potential illegal access by lower bound */
+						else if (indexInterval.getLowerBound() < arraySizeMinInterval
+								.getLowerBound()) {
+							unitToIllegalAccess.put(s, pUnsafeLower);
+						}
+						/* Potential illegal access by upper bound */
+						else if (indexInterval.getUpperBound() > arraySizeMinInterval
+								.getUpperBound()) {
+							unitToIllegalAccess.put(s, pUnsafeUpper);
+						}
 					}
 				}
 
 				/* array[5] */
-				else if (index instanceof IntConstant) {
+				else if (indexBox instanceof IntConstant) {
 
 					if (arrayDef != null) {
-						G.v().out.println("WARNING: array size is: "
-								+ arrayDef.getSize() + ", however " + arrayName
-								+ " index is: " + ((IntConstant) index).value);
+						G.v().out.println("WARNING: array size interval is: "
+								+ arrayDef.getInterval().toString()
+								+ ", however " + arrayName + " index is: "
+								+ ((IntConstant) indexBox).value);
 					}
 				}
 			}
 		}
 	}
 
+	public String getAccessNotification(Unit s) {
+		return unitToIllegalAccess.get(s);
+	}
 }

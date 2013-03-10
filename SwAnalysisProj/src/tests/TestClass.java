@@ -5,9 +5,15 @@ public class TestClass {
 	public static void main(String[] args) {
 
 		int array0[] = new int[5];
-		int z = array0[5] + array0[7];
+		long array1[] = new long[6];
+		double array2[] = new double[7];
 
-		array0[array0[6]] = 5;
+		boolean bool = args.length == 0;
+		if (bool) {
+			array0 = new int[20];
+		}
+
+		int x = 5;
 
 		// int z = array0[6] + array0[7];
 

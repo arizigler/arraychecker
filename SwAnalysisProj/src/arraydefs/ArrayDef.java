@@ -1,43 +1,46 @@
 package arraydefs;
 
+import intervals.Interval;
+
 public class ArrayDef {
 
-	private String	m_name;
-	private long	m_size;
+	private String		m_arrayName;
+	private Interval	m_sizeInterval;
 
-	public ArrayDef(String m_name, long m_size) {
+	public ArrayDef(String name, Interval interval) {
 		super();
-		this.m_name = m_name;
-		this.m_size = m_size;
+		this.m_arrayName = name;
+		this.m_sizeInterval = interval;
 	}
 
 	public String getName() {
-		return m_name;
+		return m_arrayName;
 	}
 
-	public void setName(String m_name) {
-		this.m_name = m_name;
+	public void setName(String name) {
+		this.m_arrayName = name;
 	}
 
-	public long getSize() {
-		return m_size;
+	public Interval getInterval() {
+		return m_sizeInterval;
 	}
 
-	public void setSize(long m_size) {
-		this.m_size = m_size;
+	public void setInterval(Interval interval) {
+		this.m_sizeInterval = interval;
 	}
 
 	@Override
 	public String toString() {
-		return "(" + this.m_name + "," + this.m_size + ")";
+		return "(" + this.m_arrayName + "," + this.m_sizeInterval.toString()
+				+ ")";
 	}
 
 	@Override
 	public boolean equals(Object obj) {
 		ArrayDef other = (ArrayDef) obj;
 
-		return (this.m_name.equals(other.getName()) && this.m_size == other
-				.getSize());
+		return (this.m_arrayName.equals(other.getName()) && this.m_sizeInterval
+				.equals(other.getInterval()));
 	}
 
 }

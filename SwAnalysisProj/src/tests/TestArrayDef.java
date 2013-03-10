@@ -4,33 +4,45 @@ public class TestArrayDef {
 
 	public static void main(String[] args) {
 
-		// int i = 20;
+		int array[] = new int[5];
 
-		// int array0[] = new int[5];
-		// int z1 = array0[8];
-		//
-		// int array0copy[] = array0;
-		//
-		// int z2 = array0copy[15];
+		int i = 0;
+		int g = 2;
+		int x = -5;
 
-		int array2[] = new int[5];
-		int z3 = array2[array2[5]];
+		array[10] = 5; // illegal upper bound
 
-		// int array1[] = new int[i];
-		// double array2[] = new double[6];
-		// long array3[] = new long[7];
-		//
-		// int array1copy[] = array1;
-		// double array2copy[] = array2;
-		//
-		// boolean bool = args.length == 0;
-		// int e;
-		// if (bool) {
-		// array1 = new int[10];
-		// } else {
-		// e = 4;
-		// }
-		//
-		// int x = 1;
+		array[1] = 4; // good
+
+		array[i] = 6; // illegal upper bound
+
+		array[g] = 3; // good
+
+		array[-2] = 7; // illegal lower bound
+
+		g++;
+
+		array[g] = 2; // good
+
+		array[x] = 8; // illegal lower bound
+
+		x = x + 7; // x = 2
+
+		array[x] = 1; // good
+
+		boolean b = args.length == 0;
+		if (b) {
+			g = 7;
+			i = 1;
+		} else {
+			g = 3;
+			i = -1;
+		}
+
+		/* now g is in [3,7] , i is in [-1,1] */
+
+		array[g] = 9; // potential upper bound
+		array[i] = 10; // potential lower bound
+
 	}
 }

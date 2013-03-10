@@ -19,8 +19,8 @@ package arraydefs;
  * Boston, MA 02111-1307, USA.
  */
 
+import intervals.Interval;
 import intervals.LocalsInterval;
-import intervals.VarInterval;
 
 import java.util.*;
 
@@ -124,22 +124,21 @@ class LocalArrayDefsAnalysis extends ForwardFlowAnalysis {
 				if (rhs instanceof NewArrayExpr) {
 					if (lhs instanceof Local) {
 						String arrayName = lhs.toString();
-						long arraySize = 0;
 						Value size = ((NewArrayExpr) rhs).getSize();
-
+						Interval i = null;
 						/* Create gen set for the array definition */
 						if (size instanceof IntConstant) {
-							arraySize = ((IntConstant) size).value;
-							genSet.add(new ArrayDef(arrayName, arraySize));
+							long arraySize = ((IntConstant) size).value;
+							i = new Interval(arraySize, arraySize);
+							genSet.add(new ArrayDef(arrayName, i));
 						} else if (size instanceof Local) {
 							String sizeVariableName = size.toString();
-							arraySize = getLowerBound(
-									analysis.getLocalsIntervalBefore(s),
+							i = analysis.getVarIntervalBefore(s,
 									sizeVariableName);
-							genSet.add(new ArrayDef(arrayName, arraySize));
+							genSet.add(new ArrayDef(arrayName, i));
 						}
 						/* Create kill set for the array definition */
-						killSet.add(new ArrayDef(arrayName, arraySize));
+						killSet.add(new ArrayDef(arrayName, i));
 					}
 				}
 			}
@@ -154,16 +153,17 @@ class LocalArrayDefsAnalysis extends ForwardFlowAnalysis {
 		doAnalysis();
 	}
 
-	private long getLowerBound(List localsIntervalBefore, String variableName) {
-		Iterator fsIter = localsIntervalBefore.iterator();
-		VarInterval vi = null;
-		while (fsIter.hasNext()) {
-			vi = (VarInterval) fsIter.next();
-			if (vi.getVar().equals(variableName)) { return vi.getInterval()
-					.getLowerBound(); }
-		}
-		return 0;
-	}
+	// private long getLowerBound(List localsIntervalBefore, String
+	// variableName) {
+	// Iterator fsIter = localsIntervalBefore.iterator();
+	// VarInterval vi = null;
+	// while (fsIter.hasNext()) {
+	// vi = (VarInterval) fsIter.next();
+	// if (vi.getVar().equals(variableName)) { return vi.getInterval()
+	// .getLowerBound(); }
+	// }
+	// return 0;
+	// }
 
 	/**
 	 * All INs are initialized to the empty set.
@@ -213,7 +213,7 @@ class LocalArrayDefsAnalysis extends ForwardFlowAnalysis {
 
 					ArrayDef ad = flowSetContain(in, arrayName);
 					if (ad != null) {
-						genSet.add(new ArrayDef(localName, ad.getSize()),
+						genSet.add(new ArrayDef(localName, ad.getInterval()),
 								genSet);
 					}
 				}
@@ -247,7 +247,7 @@ class LocalArrayDefsAnalysis extends ForwardFlowAnalysis {
 		FlowSet killArrayDefs = emptySet.clone();
 
 		Iterator set1Iter = inSet1.iterator();
-		Iterator set2Iter = inSet2.iterator();
+		// Iterator set2Iter = inSet2.iterator();
 
 		/* Debug prints */
 
@@ -269,16 +269,16 @@ class LocalArrayDefsAnalysis extends ForwardFlowAnalysis {
 		// }
 		//
 
-		set1Iter = inSet1.iterator();
-		set2Iter = inSet2.iterator();
+		// set1Iter = inSet1.iterator();
+		// set2Iter = inSet2.iterator();
 
 		/* Combining array definitions - taking the minimum size */
 		while (set1Iter.hasNext()) {
 			ArrayDef ad1 = (ArrayDef) set1Iter.next();
 			ArrayDef ad2 = flowSetContain(inSet2, ad1.getName());
 			if (ad2 != null) {
-				genArrayDefs.add(new ArrayDef(ad1.getName(), Math.min(
-						ad1.getSize(), ad2.getSize())));
+				genArrayDefs.add(new ArrayDef(ad1.getName(), Interval.combine(
+						ad1.getInterval(), ad2.getInterval())));
 				killArrayDefs.add(ad1);
 				killArrayDefs.add(ad2);
 			}

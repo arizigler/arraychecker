@@ -18,26 +18,17 @@ package arraycheck;
  * Free Software Foundation, Inc., 59 Temple Place - Suite 330,
  * Boston, MA 02111-1307, USA.
  */
-import java.util.Map;
-
-import soot.*;
-import soot.toolkits.graph.ExceptionalUnitGraph;
+import soot.PackManager;
+import soot.Transform;
 
 public class MyMain {
 
 	public static void main(String[] args) {
-		PackManager.v().getPack("jtp")
-				.add(new Transform("jtp.myTransform", new BodyTransformer() {
-
-					protected void internalTransform(Body body, String phase,
-							Map options) {
-						new ArrayBoundsCheck(new ExceptionalUnitGraph(body));
-						// use G.v().out instead of System.out so that Soot can
-						// redirect this output to the Eclipse console
-						G.v().out.println(body.getMethod());
-					}
-
-				}));
+		PackManager
+				.v()
+				.getPack("jtp")
+				.add(new Transform("jtp.myTransform"
+						+ ArrayBoundsTagger.PHASE_NAME, ArrayBoundsTagger.v()));
 
 		soot.Main.main(args);
 	}
