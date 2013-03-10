@@ -46,11 +46,11 @@ public class ArrayBoundsCheck {
 		/* Iterating over CFG for illegal array access */
 		while (unitIter.hasNext()) {
 			Unit s = (Unit) unitIter.next();
-
 			Stmt stmt = (Stmt) s;
 
 			/* Statement contains an array reference */
 			if (stmt.containsArrayRef()) {
+				/* TODO: fix to take care all array refs */
 
 				ArrayRef aref = stmt.getArrayRef();
 

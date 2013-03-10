@@ -5,7 +5,7 @@ public class TestClass {
 	public static void main(String[] args) {
 
 		int array0[] = new int[5];
-		int z = array0[6] + array0[7];
+		int z = array0[5] + array0[7];
 
 		// int a = 2;
 		// for (int i = 0; i < 5; i++) {

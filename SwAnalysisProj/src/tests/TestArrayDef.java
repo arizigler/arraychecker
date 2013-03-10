@@ -6,12 +6,15 @@ public class TestArrayDef {
 
 		// int i = 20;
 
-		int array0[] = new int[5];
-		int z1 = array0[8];
+		// int array0[] = new int[5];
+		// int z1 = array0[8];
+		//
+		// int array0copy[] = array0;
+		//
+		// int z2 = array0copy[15];
 
-		int array0copy[] = array0;
-
-		int z2 = array0copy[15];
+		int array2[] = new int[5];
+		int z3 = array2[array2[5]];
 
 		// int array1[] = new int[i];
 		// double array2[] = new double[6];
