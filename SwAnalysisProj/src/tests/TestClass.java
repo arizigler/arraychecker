@@ -4,8 +4,8 @@ public class TestClass {
 
 	public static void main(String[] args) {
 
-		int array0[] = new int[5];
-		array0[ array0[6]] = 5;
+		int array2[] = new int[5];
+		int z3 = array2[array2[5]];
 		//int z = array0[6] + array0[7];
 
 		// int a = 2;
