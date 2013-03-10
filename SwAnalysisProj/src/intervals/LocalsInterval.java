@@ -177,6 +177,7 @@ class LocalIntervalsAnalysis extends ForwardFlowAnalysis {
 				/* x = y */
 				if (rhs instanceof Local) {
 					VarInterval rhsVi = flowSetContain(in, rhs.toString());
+					//TODO : maybe assert in case it null
 					if (rhsVi != null) {
 						vi = new VarInterval(variableName, rhsVi.getInterval());
 					}

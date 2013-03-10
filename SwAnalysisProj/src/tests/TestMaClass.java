@@ -5,12 +5,16 @@ public class TestMaClass {
 		// loop
 		
 		int a = -1;
-		boolean b = false; 
+		int b = 0; 
+		boolean bool = args.length == 0;
 		while (a<0) {
-			if (b)
+			if (bool)
 				a=a+2;
+			else
+				a=a-2;
 		}
-		int c = a;
+		b = b/a;
+		//int c = a;
 
 		//		boolean bool = false;
 //		int a = 8;
