@@ -21,6 +21,8 @@ package intervals;
 
 import java.util.*;
 
+import org.omg.CORBA.INTERNAL;
+
 import soot.*;
 import soot.jimple.*;
 import soot.toolkits.graph.UnitGraph;
@@ -161,7 +163,8 @@ class LocalIntervalsAnalysis extends ForwardFlowAnalysis {
 			Value lhs = ((AssignStmt) s).getLeftOp();
 			Value rhs = ((AssignStmt) s).getRightOp();
 
-			if (lhs instanceof Local) {
+			
+			if (lhs instanceof Local && lhs.getType() instanceof IntType) {
 				String variableName = lhs.toString();
 
 				/* Kill previous interval */
@@ -175,11 +178,14 @@ class LocalIntervalsAnalysis extends ForwardFlowAnalysis {
 				VarInterval vi = null;
 
 				/* x = y */
-				if (rhs instanceof Local) {
+				if (rhs instanceof Local || rhs instanceof ArrayRef) {
 					VarInterval rhsVi = flowSetContain(in, rhs.toString());
-					//TODO : maybe assert in case it null
+					//TODO : maybe assert in case it null (only for local)
 					if (rhsVi != null) {
 						vi = new VarInterval(variableName, rhsVi.getInterval());
+					}
+					else {
+						vi = new VarInterval(variableName, new Interval(Interval.NEGATIVE_INF,Interval.POSITIVE_INF));
 					}
 				}
 				
@@ -224,6 +230,11 @@ class LocalIntervalsAnalysis extends ForwardFlowAnalysis {
 					Value op = ((NegExpr) rhs).getOp();
 					vi = negExprInterval(variableName, op, in);
 				}
+				
+				/* all other thing that we don't know their values */
+				else {
+					vi = new VarInterval(variableName, new Interval(Interval.NEGATIVE_INF,Interval.POSITIVE_INF));
+				}
 
 				if (unitToVisitCount.get(s) > maxUnitVisit && vi != null
 						&& viToKill != null) {
@@ -234,6 +245,7 @@ class LocalIntervalsAnalysis extends ForwardFlowAnalysis {
 					genSet.add(vi);
 				}
 			}
+
 		}
 
 		if (!genSet.isEmpty()) {
