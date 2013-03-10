@@ -1,34 +1,35 @@
 package tests;
 
+@SuppressWarnings("unused")
 public class TestArrayDef {
 
 	public static void main(String[] args) {
 
-		int array[] = new int[5];
+		int array5[] = new int[5]; // array5 => array of size 5
+
+		int array2[] = new int[2];
 
 		int i = 0;
 		int g = 2;
 		int x = -5;
 
-		array[10] = 5; // illegal upper bound
+		array5[10] = 5; // Illegal upper bound
 
-		array[1] = 4; // good
+		array5[1] = 4; // Good
 
-		array[i] = 6; // illegal upper bound
+		array5[i] = 6; // Illegal upper bound
 
-		array[g] = 3; // good
+		array5[g] = 3; // Good
 
-		array[-2] = 7; // illegal lower bound
+		array5[-2] = 7; // Illegal lower bound
 
-		g++;
+		array5[g] = 2; // Good
 
-		array[g] = 2; // good
-
-		array[x] = 8; // illegal lower bound
+		array5[x] = 8; // Illegal lower bound
 
 		x = x + 7; // x = 2
 
-		array[x] = 1; // good
+		array5[x] = 1; // Good
 
 		boolean b = args.length == 0;
 		if (b) {
@@ -41,8 +42,8 @@ public class TestArrayDef {
 
 		/* now g is in [3,7] , i is in [-1,1] */
 
-		array[g] = 9; // potential upper bound
-		array[i] = 10; // potential lower bound
+		array5[g] = 9; // Potential illegal upper bound
+		array5[i] = 10; // Potential illegal lower bound
 
 	}
 }
