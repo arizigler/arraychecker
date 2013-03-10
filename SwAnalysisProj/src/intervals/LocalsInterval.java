@@ -182,6 +182,11 @@ class LocalIntervalsAnalysis extends ForwardFlowAnalysis {
 						vi = new VarInterval(variableName, rhsVi.getInterval());
 					}
 				}
+				
+				/* x = foo() */
+				else if (rhs instanceof InvokeExpr) {
+					vi = new VarInterval(variableName, new Interval(Interval.NEGATIVE_INF, Interval.POSITIVE_INF));
+				}
 
 				/* Binary operations */
 				else if (rhs instanceof BinopExpr) {
@@ -206,6 +211,7 @@ class LocalIntervalsAnalysis extends ForwardFlowAnalysis {
 						vi = mulExprInterval(variableName, op1, op2, in);
 					}
 
+					/* x = a / b */
 					else if (rhs instanceof DivExpr) {
 						Value op1 = ((DivExpr) rhs).getOp1();
 						Value op2 = ((DivExpr) rhs).getOp2();
