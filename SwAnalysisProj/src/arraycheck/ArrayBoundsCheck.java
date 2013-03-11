@@ -100,6 +100,12 @@ public class ArrayBoundsCheck {
 							}
 						}
 
+						/* Special case: array[0] where array is of size 0 */
+						else if (arraySizeMinInterval.equals(Interval.EMPTY)
+								&& indexInterval.equals(Interval.EMPTY)) {
+							unitToIllegalAccess.put(s, unsafeUpper);
+						}
+
 						/* Potential illegal access by lower bound */
 						else if (indexInterval.getLowerBound() < arraySizeMinInterval
 								.getLowerBound()) {

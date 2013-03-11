@@ -102,21 +102,6 @@ class LocalArrayDefsAnalysis extends ForwardFlowAnalysis {
 			FlowSet genSet = emptySet.clone();
 			FlowSet killSet = emptySet.clone();
 
-			// Iterator defBoxIter = s.getDefBoxes().iterator();
-
-			/* Create gen set for "int x[]" statements - not needed */
-			// while (defBoxIter.hasNext()) {
-			// Value defValue = ((ValueBox) defBoxIter.next()).getValue();
-			//
-			// if (defValue instanceof Local && s.getUseBoxes().size() == 0) {
-			// String variableName = defValue.toString();
-			// G.v().out.println("varName is is " + variableName);
-			// if (defValue.getType() instanceof ArrayType) {
-			// genSet.add(new ArrayDef(variableName, 0));
-			// }
-			// }
-			// }
-
 			if (s instanceof AssignStmt) {
 				Value lhs = ((AssignStmt) s).getLeftOp();
 				Value rhs = ((AssignStmt) s).getRightOp();
@@ -126,6 +111,7 @@ class LocalArrayDefsAnalysis extends ForwardFlowAnalysis {
 						String arrayName = lhs.toString();
 						Value size = ((NewArrayExpr) rhs).getSize();
 						Interval i = null;
+
 						/* Create gen set for the array definition */
 						if (size instanceof IntConstant) {
 							long arraySize = ((IntConstant) size).value;
@@ -135,6 +121,14 @@ class LocalArrayDefsAnalysis extends ForwardFlowAnalysis {
 							String sizeVariableName = size.toString();
 							i = analysis.getVarIntervalBefore(s,
 									sizeVariableName);
+
+							/*
+							 * if array size interval has negative edges, null
+							 * them
+							 */
+							if (i.getLowerBound() < 0) i.setLowerBound(0);
+							if (i.getUpperBound() < 0) i.setUpperBound(0);
+
 							genSet.add(new ArrayDef(arrayName, i));
 						}
 						/* Create kill set for the array definition */
