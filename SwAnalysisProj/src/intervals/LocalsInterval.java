@@ -161,7 +161,8 @@ class LocalIntervalsAnalysis extends ForwardFlowAnalysis {
 			Value lhs = ((AssignStmt) s).getLeftOp();
 			Value rhs = ((AssignStmt) s).getRightOp();
 
-			if (lhs instanceof Local && lhs.getType() instanceof IntType) {
+			if ((lhs instanceof Local || lhs instanceof FieldRef)
+					&& lhs.getType() instanceof IntType) {
 				String variableName = lhs.toString();
 
 				/* Kill previous interval */
@@ -181,8 +182,9 @@ class LocalIntervalsAnalysis extends ForwardFlowAnalysis {
 							((IntConstant) rhs).value));
 				}
 
-				/* x = y */
-				else if (rhs instanceof Local || rhs instanceof ArrayRef) {
+				/* x = y or x = o.y or x = arr[y] */
+				else if (rhs instanceof Local || rhs instanceof FieldRef
+						|| rhs instanceof ArrayRef) {
 					VarInterval rhsVi = flowSetContain(in, rhs.toString());
 					// TODO : maybe assert in case it null (only for local)
 					if (rhsVi != null) {
@@ -366,8 +368,8 @@ class LocalIntervalsAnalysis extends ForwardFlowAnalysis {
 			return new Interval(((IntConstant) val).value,
 					((IntConstant) val).value);
 		}
-		/* Value is a local */
-		else if (val instanceof Local) {
+		/* Value is a local or FieldRef */
+		else if (val instanceof Local || val instanceof FieldRef) {
 			VarInterval vi = flowSetContain(fs, val.toString());
 			if (vi != null) { return vi.getInterval(); }
 		}
