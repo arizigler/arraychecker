@@ -1,5 +1,6 @@
 package intervals;
 
+
 public class Interval {
 
 	private long			m_lowerBound;
@@ -89,10 +90,10 @@ public class Interval {
 
 		if (newInter.getUpperBound() > oldInter.getUpperBound()) upper = POSITIVE_INF;
 
-		else upper = oldInter.getUpperBound();
+		else upper = newInter.getUpperBound();
 		if (newInter.getLowerBound() < oldInter.getLowerBound()) {
 			lower = NEGATIVE_INF;
-		} else lower = oldInter.getLowerBound();
+		} else lower = newInter.getLowerBound();
 
 		return new Interval(lower, upper);
 	}
@@ -101,6 +102,7 @@ public class Interval {
 		/* [a,b] + [c,d] = [a + c, b + d] */
 		if (i1 == null || i2 == null) return new Interval(NEGATIVE_INF,
 				POSITIVE_INF);
+
 		long lower, upper;
 		if (i1.getLowerBound() == NEGATIVE_INF
 				|| i2.getLowerBound() == NEGATIVE_INF) lower = NEGATIVE_INF;
