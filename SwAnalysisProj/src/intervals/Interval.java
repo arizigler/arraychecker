@@ -88,9 +88,9 @@ public class Interval {
 			Interval newInter) {
 		long lower, upper;
 		if (newInter.getUpperBound() > oldInter.getUpperBound()) upper = POSITIVE_INF;
-		else upper = oldInter.getUpperBound();
+		else upper = newInter.getUpperBound();
 		if (newInter.getLowerBound() < oldInter.getLowerBound()) lower = NEGATIVE_INF;
-		else lower = oldInter.getLowerBound();
+		else lower = newInter.getLowerBound();
 		return new Interval(lower, upper);
 	}
 
