@@ -34,10 +34,11 @@ import arraydefs.LocalArrayDefs;
 public class ArrayBoundsCheck {
 
 	protected Map<Unit, String>	unitToIllegalAccess;
-	private static String		unsafeLower		= "Unsafe Array Access: Illegal Lower Bound";
-	private static String		unsafeUpper		= "Unsafe Array Access: Illegal Upper Bound";
-	private static String		pUnsafeLower	= "Unsafe Array Access: Potentially Illegal Lower Bound";
-	private static String		pUnsafeUpper	= "Unsafe Array Access: Potentially Illegal Upper Bound";
+	private static String		unsafeLower			= "Unsafe Array Access: Illegal Lower Bound";
+	private static String		unsafeUpper			= "Unsafe Array Access: Illegal Upper Bound";
+	private static String		pUnsafeLowerUpper	= "Unsafe Array Access: Potentially Illegal Lower and Upper Bounds";
+	private static String		pUnsafeLower		= "Unsafe Array Access: Potentially Illegal Lower Bound";
+	private static String		pUnsafeUpper		= "Unsafe Array Access: Potentially Illegal Upper Bound";
 
 	public ArrayBoundsCheck(UnitGraph graph) {
 
@@ -85,8 +86,13 @@ public class ArrayBoundsCheck {
 						Interval arraySizeMaxInterval = Interval
 								.toMaxArrayIndex(arraySizeInterval);
 
+						/* Special case: access using INF interval */
+						if (indexInterval.equals(Interval.INF)) {
+							unitToIllegalAccess.put(s, pUnsafeLowerUpper);
+						}
+
 						/* Definite illegal access */
-						if (!Interval.intersect(indexInterval,
+						else if (!Interval.intersect(indexInterval,
 								arraySizeMaxInterval)) {
 
 							/* Definite illegal access by lower bound */
@@ -101,32 +107,32 @@ public class ArrayBoundsCheck {
 						}
 
 						/* Special case: array[0] where array is of size 0 */
-						else if (arraySizeMinInterval.equals(Interval.EMPTY)
-								&& indexInterval.equals(Interval.EMPTY)) {
+						else if (arraySizeMinInterval.equals(Interval.ZERO)
+								&& indexInterval.equals(Interval.ZERO)) {
 							unitToIllegalAccess.put(s, unsafeUpper);
 						}
 
 						/* Potential illegal access by lower bound */
 						else if (indexInterval.getLowerBound() < arraySizeMinInterval
 								.getLowerBound()) {
-							unitToIllegalAccess.put(s, pUnsafeLower);
+							if (indexInterval.getUpperBound() == Interval.POSITIVE_INF) {
+								unitToIllegalAccess.put(s, pUnsafeLowerUpper);
+							} else unitToIllegalAccess.put(s, pUnsafeLower);
 						}
 						/* Potential illegal access by upper bound */
 						else if (indexInterval.getUpperBound() > arraySizeMinInterval
 								.getUpperBound()) {
-							unitToIllegalAccess.put(s, pUnsafeUpper);
+							if (indexInterval.getLowerBound() == Interval.NEGATIVE_INF) {
+								unitToIllegalAccess.put(s, pUnsafeLowerUpper);
+							} else unitToIllegalAccess.put(s, pUnsafeUpper);
 						}
 					}
 				}
 
 				/* array[5] */
 				else if (indexBox instanceof IntConstant) {
-
 					if (arrayDef != null) {
-						G.v().out.println("WARNING: array size interval is: "
-								+ arrayDef.getInterval().toString()
-								+ ", however " + arrayName + " index is: "
-								+ ((IntConstant) indexBox).value);
+						/* TODO: check if this case is possible */
 					}
 				}
 			}

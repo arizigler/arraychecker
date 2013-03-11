@@ -21,8 +21,6 @@ package intervals;
 
 import java.util.*;
 
-import org.omg.CORBA.INTERNAL;
-
 import soot.*;
 import soot.jimple.*;
 import soot.toolkits.graph.UnitGraph;
@@ -109,22 +107,22 @@ class LocalIntervalsAnalysis extends ForwardFlowAnalysis {
 			FlowSet genSet = emptySet.clone();
 			FlowSet killSet = emptySet.clone();
 
-//			if (s instanceof AssignStmt) {
-//				Value lhs = ((AssignStmt) s).getLeftOp();
-//				Value rhs = ((AssignStmt) s).getRightOp();
-//
-//				if (lhs instanceof Local && rhs instanceof IntConstant) genSet
-//						.add(new VarInterval(lhs.toString(), new Interval(
-//								((IntConstant) rhs).value,
-//								((IntConstant) rhs).value)));
-//
-//				/* Create kill set for the variable definition */
-//				killSet.add(new VarInterval(lhs.toString(), Interval.EMPTY));
-//			}
-//			/* This is not a local variable definition */
-//			else {
-//				/* nothing to do */
-//			}
+			// if (s instanceof AssignStmt) {
+			// Value lhs = ((AssignStmt) s).getLeftOp();
+			// Value rhs = ((AssignStmt) s).getRightOp();
+			//
+			// if (lhs instanceof Local && rhs instanceof IntConstant) genSet
+			// .add(new VarInterval(lhs.toString(), new Interval(
+			// ((IntConstant) rhs).value,
+			// ((IntConstant) rhs).value)));
+			//
+			// /* Create kill set for the variable definition */
+			// killSet.add(new VarInterval(lhs.toString(), Interval.EMPTY));
+			// }
+			// /* This is not a local variable definition */
+			// else {
+			// /* nothing to do */
+			// }
 			unitToGenerateSet.put(s, genSet);
 			unitToKillSet.put(s, killSet);
 		}
@@ -163,7 +161,6 @@ class LocalIntervalsAnalysis extends ForwardFlowAnalysis {
 			Value lhs = ((AssignStmt) s).getLeftOp();
 			Value rhs = ((AssignStmt) s).getRightOp();
 
-			
 			if (lhs instanceof Local && lhs.getType() instanceof IntType) {
 				String variableName = lhs.toString();
 
@@ -179,25 +176,30 @@ class LocalIntervalsAnalysis extends ForwardFlowAnalysis {
 
 				/* x = const */
 				if (rhs instanceof IntConstant) {
-					vi = new VarInterval(variableName, 
-										 new Interval(((IntConstant) rhs).value,((IntConstant) rhs).value));
+					vi = new VarInterval(variableName, new Interval(
+							((IntConstant) rhs).value,
+							((IntConstant) rhs).value));
 				}
 
 				/* x = y */
 				else if (rhs instanceof Local || rhs instanceof ArrayRef) {
 					VarInterval rhsVi = flowSetContain(in, rhs.toString());
-					//TODO : maybe assert in case it null (only for local)
+					// TODO : maybe assert in case it null (only for local)
 					if (rhsVi != null) {
 						vi = new VarInterval(variableName, rhsVi.getInterval());
-					}
-					else {
-						vi = new VarInterval(variableName, new Interval(Interval.NEGATIVE_INF,Interval.POSITIVE_INF));
+					} else {
+						vi = new VarInterval(variableName, new Interval(
+								Interval.NEGATIVE_INF, Interval.POSITIVE_INF));
 					}
 				}
-				
-				/* x = foo() */
+
+				/*
+				 * x = foo() (we do not implement inter-procedural analysis,
+				 * therefore we must assume [INF,-INF])
+				 */
 				else if (rhs instanceof InvokeExpr) {
-					vi = new VarInterval(variableName, new Interval(Interval.NEGATIVE_INF, Interval.POSITIVE_INF));
+					vi = new VarInterval(variableName, new Interval(
+							Interval.NEGATIVE_INF, Interval.POSITIVE_INF));
 				}
 
 				/* Binary operations */
@@ -236,10 +238,14 @@ class LocalIntervalsAnalysis extends ForwardFlowAnalysis {
 					Value op = ((NegExpr) rhs).getOp();
 					vi = negExprInterval(variableName, op, in);
 				}
-				
-				/* all other thing that we don't know their values */
+
+				/*
+				 * For all other creatures we do not their values, must assume
+				 * [-INF,INF]
+				 */
 				else {
-					vi = new VarInterval(variableName, new Interval(Interval.NEGATIVE_INF,Interval.POSITIVE_INF));
+					vi = new VarInterval(variableName, new Interval(
+							Interval.NEGATIVE_INF, Interval.POSITIVE_INF));
 				}
 
 				if (unitToVisitCount.get(s) > maxUnitVisit && vi != null
@@ -340,7 +346,7 @@ class LocalIntervalsAnalysis extends ForwardFlowAnalysis {
 	}
 
 	/*
-	 * returns the corresponding varInterval from the flowSet (fs) according to
+	 * Returns the corresponding varInterval from the flowSet (fs) according to
 	 * viName, if the flowSet doesn't contain that varInterval returns null
 	 */
 	private VarInterval flowSetContain(FlowSet fs, String viName) {
