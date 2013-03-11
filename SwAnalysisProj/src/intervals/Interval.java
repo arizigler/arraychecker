@@ -1,7 +1,5 @@
 package intervals;
 
-import soot.G;
-
 public class Interval {
 
 	private long			m_lowerBound;
@@ -88,15 +86,14 @@ public class Interval {
 	public static Interval convergentInterval(Interval oldInter,
 			Interval newInter) {
 		long lower, upper;
+
 		if (newInter.getUpperBound() > oldInter.getUpperBound()) upper = POSITIVE_INF;
+
 		else upper = oldInter.getUpperBound();
 		if (newInter.getLowerBound() < oldInter.getLowerBound()) {
-
-			G.v().out.println("new lb is " + newInter.getLowerBound()
-					+ " old lb is " + oldInter.getLowerBound());
-
 			lower = NEGATIVE_INF;
 		} else lower = oldInter.getLowerBound();
+
 		return new Interval(lower, upper);
 	}
 
