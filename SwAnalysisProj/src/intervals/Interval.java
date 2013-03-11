@@ -69,8 +69,9 @@ public class Interval {
 
 	}
 
-	/* [a,b] U [c,d] = [min(a,c), max(b,d)] */
+
 	public static Interval combine(Interval i1, Interval i2) {
+		/* [a,b] U [c,d] = [min(a,c), max(b,d)] */
 		if (i1 == null || i2 == null) return new Interval(NEGATIVE_INF,
 				POSITIVE_INF);
 
@@ -104,7 +105,7 @@ public class Interval {
 	}
 
 	public static Interval subExpr(Interval i1, Interval i2) {
-		/* [a,b] - [c,d] = [a − d, b − c] */
+		/* [a,b] - [c,d] = [a - d, b - c] */
 		if (i1 == null || i2 == null) return new Interval(NEGATIVE_INF,
 				POSITIVE_INF);
 		long lower, upper;
@@ -118,7 +119,7 @@ public class Interval {
 	}
 
 	public static Interval negExpr(Interval i1) {
-		/* -[a,b] = [−b, -a] */
+		/* -[a,b] = [-b, -a] */
 		if (i1 == null) return new Interval(NEGATIVE_INF, POSITIVE_INF);
 		long lower = -i1.getUpperBound();
 		long upper = -i1.getLowerBound();
@@ -189,7 +190,7 @@ public class Interval {
 		else if (upper != POSITIVE_INF) {
 			/*
 			 * we should get here only if we have infinite lower but not
-			 * infinite uuper
+			 * infinite upper
 			 */
 			upper = NEGATIVE_INF;
 			if (l1 != NEGATIVE_INF) {
