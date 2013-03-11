@@ -86,12 +86,20 @@ public class Interval {
 
 	public static Interval convergentInterval(Interval oldInter,
 			Interval newInter) {
-		long lower, upper;
-		if (newInter.getUpperBound() > oldInter.getUpperBound()) upper = POSITIVE_INF;
-		else upper = newInter.getUpperBound();
-		if (newInter.getLowerBound() < oldInter.getLowerBound()) lower = NEGATIVE_INF;
-		else lower = newInter.getLowerBound();
-		return new Interval(lower, upper);
+		if (newInter.getUpperBound() > oldInter.getUpperBound() &&
+				!(newInter.getLowerBound() < oldInter.getLowerBound())) {
+			return new Interval(oldInter.getLowerBound(),POSITIVE_INF);
+		}
+		if (newInter.getLowerBound() < oldInter.getLowerBound() &&
+				!(newInter.getUpperBound() > oldInter.getUpperBound())) {
+			return new Interval(NEGATIVE_INF,oldInter.getUpperBound());
+		}
+		if (!(newInter.getUpperBound() > oldInter.getUpperBound()) &&
+				!(newInter.getLowerBound() < oldInter.getLowerBound())) {
+			return new Interval(newInter);
+		}
+		
+		return new Interval(NEGATIVE_INF,POSITIVE_INF);
 	}
 
 	public static Interval addExpr(Interval i1, Interval i2) {
