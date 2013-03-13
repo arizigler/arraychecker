@@ -135,6 +135,15 @@ public class Interval {
 		if (i1 == null) return new Interval(NEGATIVE_INF, POSITIVE_INF);
 		long lower = -i1.getUpperBound();
 		long upper = -i1.getLowerBound();
+		if (i1.getUpperBound() == POSITIVE_INF)
+			lower = NEGATIVE_INF;
+		if (i1.getUpperBound() == NEGATIVE_INF)
+			lower = POSITIVE_INF;
+		if (i1.getLowerBound()== POSITIVE_INF)
+			upper = NEGATIVE_INF;
+		if (i1.getLowerBound() == NEGATIVE_INF)
+			upper = POSITIVE_INF;
+		
 		return new Interval(lower, upper);
 	}
 
