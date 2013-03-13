@@ -1,6 +1,5 @@
 package intervals;
 
-
 public class VarInterval {
 
 	private String		m_var;
@@ -21,6 +20,10 @@ public class VarInterval {
 
 	public void setVar(String m_var) {
 		this.m_var = m_var;
+	}
+
+	public void setInterval(Interval interval) {
+		this.m_interval = interval;
 	}
 
 	@Override

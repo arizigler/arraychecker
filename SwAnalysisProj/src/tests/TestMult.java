@@ -72,7 +72,16 @@ public class TestMult {
 
 		for (int i = 0; i < 5; i++) {
 			array3[i] = 5;
+			array16[i] = 5;
 			p *= -2;
+		}
+
+		int i = 0, j = 5;
+
+		if (i == j) {
+
+			array3[j] = 5;
+
 		}
 
 		// p is [-INF,INF]

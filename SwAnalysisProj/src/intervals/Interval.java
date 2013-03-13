@@ -40,8 +40,19 @@ public class Interval {
 		return m_isBottom;
 	}
 
+	public static Interval getIntersection(Interval i1, Interval i2) {
+		if (i1 == null || i2 == null) return null;
+
+		if (i1.isBottom() || i2.isBottom() || !intersect(i1, i2)) return Interval.BOTTOM;
+
+		return new Interval(Math.max(i1.getLowerBound(), i2.getLowerBound()),
+				Math.min(i1.getUpperBound(), i2.getUpperBound()));
+
+	}
+
 	public static boolean intersect(Interval i1, Interval i2) {
 		if (i1 == null || i2 == null) return false;
+		if (i1.isBottom() || i2.isBottom()) return false;
 
 		if ((i1.getUpperBound() < i2.getLowerBound())
 				|| (i2.getUpperBound() < i1.getLowerBound())) return false;
@@ -49,21 +60,10 @@ public class Interval {
 		return true;
 	}
 
-	public static Interval shiftLeft(Interval i, long num) {
-		if (i == null) return null;
-
-		return new Interval(i.getLowerBound() - num, i.getUpperBound() - num);
-	}
-
-	public static Interval shiftRight(Interval i, long num) {
-		if (i == null) return null;
-
-		return new Interval(i.getLowerBound() + num, i.getUpperBound() + num);
-	}
-
 	public static Interval toMinArrayIndex(Interval i) {
 
 		if (i == null || i.getLowerBound() < 0) return null;
+		if (i.isBottom()) return Interval.BOTTOM;
 		if (i.equals(Interval.ZERO)) return Interval.ZERO;
 
 		return new Interval(0, i.getLowerBound() - 1);
@@ -72,14 +72,14 @@ public class Interval {
 	public static Interval toMaxArrayIndex(Interval i) {
 
 		if (i == null || i.getLowerBound() < 0) return null;
+		if (i.isBottom()) return Interval.BOTTOM;
+
 		if (i.equals(Interval.ZERO)) return Interval.ZERO;
 
 		return new Interval(0, i.getUpperBound() - 1);
 	}
 
 	/**
-	 * @param i1
-	 * @param i2
 	 * @return true if i1 is completely before i2 on x axis, false otherwise.
 	 */
 	public static boolean isBefore(Interval i1, Interval i2) {
@@ -154,6 +154,7 @@ public class Interval {
 	}
 
 	public static Interval negExpr(Interval i1) {
+
 		/* -[a,b] --> [-b, -a] */
 		if (i1 != null && i1.m_isBottom) return Interval.BOTTOM;
 		if (i1 == null) return new Interval(NEGATIVE_INF, POSITIVE_INF);
@@ -311,6 +312,13 @@ public class Interval {
 		return new Interval(lower, upper);
 	}
 
+	public static Interval meet(Interval i) {
+
+		if (i.getLowerBound() <= i.getUpperBound()) return i;
+
+		return Interval.BOTTOM;
+	}
+
 	public long getLowerBound() {
 		return m_lowerBound;
 	}
@@ -367,6 +375,8 @@ public class Interval {
 
 	@Override
 	public Interval clone() {
-		return new Interval(new Long(m_lowerBound), new Long(m_upperBound));
+		return new Interval(new Long(m_lowerBound), new Long(m_upperBound),
+				new Boolean(m_isBottom));
 	}
+
 }

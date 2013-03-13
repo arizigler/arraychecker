@@ -129,7 +129,6 @@ class BLocalIntervalsAnalysis extends ForwardBranchedFlowAnalysis {
 
 		/* If statement */
 		if (u instanceof IfStmt) {
-			G.v().out.println("In a condition statement");
 
 			IfStmt ifStmt = (IfStmt) u;
 			Value condition = ifStmt.getCondition();
@@ -452,7 +451,7 @@ class BLocalIntervalsAnalysis extends ForwardBranchedFlowAnalysis {
 				}
 
 				/* a <= b */
-				if (cond instanceof LeExpr) {
+				else if (cond instanceof LeExpr) {
 
 					if (holds) {
 						pairLE(viLeft, viRight);
@@ -462,7 +461,7 @@ class BLocalIntervalsAnalysis extends ForwardBranchedFlowAnalysis {
 				}
 
 				/* a > b */
-				if (cond instanceof GtExpr) {
+				else if (cond instanceof GtExpr) {
 
 					if (holds) {
 						pairLT(viRight, viLeft);
@@ -470,9 +469,8 @@ class BLocalIntervalsAnalysis extends ForwardBranchedFlowAnalysis {
 						pairLE(viLeft, viRight);
 					}
 				}
-
 				/* a >= b */
-				if (cond instanceof GtExpr) {
+				else if (cond instanceof GtExpr) {
 
 					if (holds) {
 						pairLE(viRight, viLeft);
@@ -480,36 +478,97 @@ class BLocalIntervalsAnalysis extends ForwardBranchedFlowAnalysis {
 						pairLT(viLeft, viRight);
 					}
 				}
+				/* a == b */
+				else if (cond instanceof EqExpr) {
+
+					if (holds) {
+						pairEq(viRight, viLeft);
+					}
+					/* else nothing should be done */
+				}
 
 			}
 		}
 
 	}
 
+	/* Pair< */
 	private void pairLT(VarInterval viLeft, VarInterval viRight) {
 
-		viLeft.getInterval().setUpperBound(
-				Math.min(viLeft.getInterval().getUpperBound(), viRight
-						.getInterval().getUpperBound() - 1));
+		Interval li = viLeft.getInterval();
+		Interval ri = viRight.getInterval();
 
-		viRight.getInterval().setLowerBound(
-				Math.max(viLeft.getInterval().getLowerBound(), viRight
-						.getInterval().getLowerBound()));
+		/* In case of bottom */
+		if (li.isBottom() || ri.isBottom()) {
+			viLeft.setInterval(Interval.BOTTOM);
+			viRight.setInterval(Interval.BOTTOM);
+		} else {
+			/* Compute new intervals */
+			Interval newLeftInterval = new Interval(li.getLowerBound(),
+					Math.min(li.getUpperBound(), ri.getUpperBound() - 1));
+
+			Interval newRightInterval = new Interval(Math.max(
+					li.getLowerBound(), ri.getLowerBound()), ri.getUpperBound());
+
+			/* Invoke meet on the result */
+			viLeft.setInterval(Interval.meet(newLeftInterval));
+			viRight.setInterval(Interval.meet(newRightInterval));
+		}
+
+		// viLeft.getInterval().setUpperBound(
+		// Math.min(viLeft.getInterval().getUpperBound(), viRight
+		// .getInterval().getUpperBound() - 1));
+
+		// viRight.getInterval().setLowerBound(
+		// Math.max(viLeft.getInterval().getLowerBound(), viRight
+		// .getInterval().getLowerBound()));
 
 	}
 
+	/* Pair<= */
 	private void pairLE(VarInterval viLeft, VarInterval viRight) {
 
-		viLeft.getInterval().setUpperBound(
-				Math.min(viLeft.getInterval().getUpperBound(), viRight
-						.getInterval().getUpperBound()));
+		Interval li = viLeft.getInterval();
+		Interval ri = viRight.getInterval();
 
-		viRight.getInterval().setLowerBound(
-				Math.max(viLeft.getInterval().getLowerBound(), viRight
-						.getInterval().getLowerBound()));
+		/* In case of bottom */
+		if (li.isBottom() || ri.isBottom()) {
+			viLeft.setInterval(Interval.BOTTOM);
+			viRight.setInterval(Interval.BOTTOM);
+		} else {
+			/* Compute new intervals */
+			Interval newLeftInterval = new Interval(li.getLowerBound(),
+					Math.min(li.getUpperBound(), ri.getUpperBound()));
 
-		// G.v().out.println("out is: left: " + viLeft.toString() + " right: "
-		// + viRight.toString());
+			Interval newRightInterval = new Interval(Math.max(
+					li.getLowerBound(), ri.getLowerBound()), ri.getUpperBound());
+
+			/* Invoke meet on the result */
+			viLeft.setInterval(Interval.meet(newLeftInterval));
+			viRight.setInterval(Interval.meet(newRightInterval));
+		}
+
+		// viLeft.getInterval().setUpperBound(
+		// Math.min(viLeft.getInterval().getUpperBound(), viRight
+		// .getInterval().getUpperBound()));
+		//
+		// viRight.getInterval().setLowerBound(
+		// Math.max(viLeft.getInterval().getLowerBound(), viRight
+		// .getInterval().getLowerBound()));
+
+	}
+
+	/* Pair== */
+	private void pairEq(VarInterval viLeft, VarInterval viRight) {
+
+		Interval li = viLeft.getInterval();
+		Interval ri = viRight.getInterval();
+
+		/* Bottoms are handled by Interval intersection */
+		Interval intersection = Interval.getIntersection(li, ri);
+
+		viLeft.setInterval(intersection);
+		viRight.setInterval(intersection);
 	}
 
 	private FlowSet cloneSet(FlowSet in) {
