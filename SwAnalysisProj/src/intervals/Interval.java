@@ -142,8 +142,8 @@ public class Interval {
 
 	public static Interval mul(Interval i1, Interval i2) {
 		/*
-		 * [a, b] × [c, d] = [min (a × c, a × d, b × c, b × d), max (a ×
-		 * c, a × d, b × c, b × d)]
+		 * [a, b] * [c, d] = [min (a * c, a * d, b * c, b * d), max (a * c, a *
+		 * d, b * c, b * d)]
 		 */
 		if (i1 == null || i2 == null) return new Interval(NEGATIVE_INF,
 				POSITIVE_INF);
