@@ -35,10 +35,10 @@ public class TestMaClass {
 //		int b = a/a;
 //		int c = a/d;
 		
-		int a = 1;
+		int array5[] = new int[5];
 		
-		while (++a < 8 || a <0) {
-			int x = 9;
+		for  (int i = 0; i<5; i++) {
+			array5[i] = i;
 		}
 //		int x = 2;
 //		for (int i=0; i<10; i++)

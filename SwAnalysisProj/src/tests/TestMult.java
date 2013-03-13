@@ -71,7 +71,7 @@ public class TestMult {
 		p = 2; // p is [2,2]
 
 		for (int i = 0; i < 5; i++) {
-			array16[i] = 5;
+			array3[i] = 5;
 			p *= -2;
 		}
 

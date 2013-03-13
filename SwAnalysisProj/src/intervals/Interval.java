@@ -13,8 +13,7 @@ public class Interval {
 	public static Interval	INF				= new Interval(NEGATIVE_INF,
 													POSITIVE_INF);
 	public static Interval	BOTTOM			= new Interval(0, 0, true);
-	
-	
+
 	public Interval(long lower, long upper) {
 		m_lowerBound = lower;
 		m_upperBound = upper;
@@ -26,17 +25,17 @@ public class Interval {
 		m_upperBound = inter.getUpperBound();
 		m_isBottom = inter.m_isBottom;
 	}
-	
+
 	public Interval(long lower, long upper, boolean is_bottom) {
 		m_lowerBound = lower;
 		m_upperBound = upper;
 		m_isBottom = is_bottom;
 	}
-	
+
 	public void setBottom(boolean b) {
 		m_isBottom = b;
 	}
-	
+
 	public boolean isBottom() {
 		return m_isBottom;
 	}
@@ -110,22 +109,18 @@ public class Interval {
 
 	public static Interval convergentInterval(Interval oldInter,
 			Interval newInter) {
-		if (oldInter.isBottom() || newInter.isBottom())
-			return Interval.BOTTOM;
-		if (newInter.getUpperBound() > oldInter.getUpperBound() &&
-				!(newInter.getLowerBound() < oldInter.getLowerBound())) {
-			return new Interval(oldInter.getLowerBound(),POSITIVE_INF);
-		}
-		if (newInter.getLowerBound() < oldInter.getLowerBound() &&
-				!(newInter.getUpperBound() > oldInter.getUpperBound())) {
-			return new Interval(NEGATIVE_INF,oldInter.getUpperBound());
-		}
-		if (!(newInter.getUpperBound() > oldInter.getUpperBound()) &&
-				!(newInter.getLowerBound() < oldInter.getLowerBound())) {
-			return new Interval(newInter);
-		}
-		
-		return new Interval(NEGATIVE_INF,POSITIVE_INF);
+		if (oldInter.isBottom() || newInter.isBottom()) return Interval.BOTTOM;
+		if (newInter.getUpperBound() > oldInter.getUpperBound()
+				&& !(newInter.getLowerBound() < oldInter.getLowerBound())) { return new Interval(
+				oldInter.getLowerBound(), POSITIVE_INF); }
+		if (newInter.getLowerBound() < oldInter.getLowerBound()
+				&& !(newInter.getUpperBound() > oldInter.getUpperBound())) { return new Interval(
+				NEGATIVE_INF, oldInter.getUpperBound()); }
+		if (!(newInter.getUpperBound() > oldInter.getUpperBound())
+				&& !(newInter.getLowerBound() < oldInter.getLowerBound())) { return new Interval(
+				newInter); }
+
+		return new Interval(NEGATIVE_INF, POSITIVE_INF);
 	}
 
 	public static Interval addExpr(Interval i1, Interval i2) {
@@ -168,22 +163,18 @@ public class Interval {
 		if (i1 == null) return new Interval(NEGATIVE_INF, POSITIVE_INF);
 		long lower = -i1.getUpperBound();
 		long upper = -i1.getLowerBound();
-		if (i1.getUpperBound() == POSITIVE_INF)
-			lower = NEGATIVE_INF;
-		if (i1.getUpperBound() == NEGATIVE_INF)
-			lower = POSITIVE_INF;
-		if (i1.getLowerBound()== POSITIVE_INF)
-			upper = NEGATIVE_INF;
-		if (i1.getLowerBound() == NEGATIVE_INF)
-			upper = POSITIVE_INF;
-		
+		if (i1.getUpperBound() == POSITIVE_INF) lower = NEGATIVE_INF;
+		if (i1.getUpperBound() == NEGATIVE_INF) lower = POSITIVE_INF;
+		if (i1.getLowerBound() == POSITIVE_INF) upper = NEGATIVE_INF;
+		if (i1.getLowerBound() == NEGATIVE_INF) upper = POSITIVE_INF;
+
 		return new Interval(lower, upper);
 	}
 
 	public static Interval mul(Interval i1, Interval i2) {
 		/*
-		 * [a, b] × [c, d] = [min (a × c, a × d, b × c, b × d), max (a ×
-		 * c, a × d, b × c, b × d)]
+		 * [a, b] * [c, d] = [min (a * c, a * d, b * c, b * d), max (a * c, a *
+		 * d, b * c, b * d)]
 		 */
 		if ((i1 != null && i1.isBottom()) || (i2 != null && i2.isBottom()))
 			return Interval.BOTTOM;
@@ -263,34 +254,27 @@ public class Interval {
 		long l1 = i1.getLowerBound(), l2 = i2.getLowerBound();
 		long u1 = i1.getUpperBound(), u2 = i2.getUpperBound();
 
-		if (l2 == 0 && u2 ==0)
-			/* dividing by zero --> [-INF,INF] */
-			return new Interval(NEGATIVE_INF,POSITIVE_INF);
-		
-		if (l2 == 0)
-			l2 = 1;
-		if (u2 == 0)
-			u2 = -1;
-		
+		if (l2 == 0 && u2 == 0)
+		/* dividing by zero --> [-INF,INF] */
+		return new Interval(NEGATIVE_INF, POSITIVE_INF);
+
+		if (l2 == 0) l2 = 1;
+		if (u2 == 0) u2 = -1;
+
 		if (l1 != NEGATIVE_INF && l2 != NEGATIVE_INF && u1 != POSITIVE_INF
-				&& u2 != POSITIVE_INF) {
-			return new Interval(Math.min(
-					Math.min(l1 / l2, l1 / u2), Math.min(u1 / l2, u1 / u2)),
-					Math.max(Math.max(l1 / l2, l1 / u2),
-							Math.max(u1 / l2, u1 / u2)));
-		}
+				&& u2 != POSITIVE_INF) { return new Interval(
+				Math.min(Math.min(l1 / l2, l1 / u2), Math.min(u1 / l2, u1 / u2)),
+				Math.max(Math.max(l1 / l2, l1 / u2), Math.max(u1 / l2, u1 / u2))); }
 
 		long lower = 0, upper = 0;
 
 		/* negative INF */
-		if ((l1 == NEGATIVE_INF && (l2 > 0 || u2 > 0)) ||
-				u1 == POSITIVE_INF && (l2 < 0 || u2 < 0))
-			lower = NEGATIVE_INF;
+		if ((l1 == NEGATIVE_INF && (l2 > 0 || u2 > 0)) || u1 == POSITIVE_INF
+				&& (l2 < 0 || u2 < 0)) lower = NEGATIVE_INF;
 
 		/* positive INF */
 		if ((l1 == NEGATIVE_INF && (l2 < 0 || u2 < 0)) || u1 == POSITIVE_INF
-				&& (l2 > 0 || u2 > 0))
-			upper = POSITIVE_INF;
+				&& (l2 > 0 || u2 > 0)) upper = POSITIVE_INF;
 
 		if (lower == NEGATIVE_INF && upper == POSITIVE_INF) return new Interval(
 				lower, upper);
