@@ -355,4 +355,9 @@ public class Interval {
 		result = prime * result + (int) (m_upperBound ^ (m_upperBound >>> 32));
 		return result;
 	}
+
+	@Override
+	public Interval clone() {
+		return new Interval(new Long(m_lowerBound), new Long(m_upperBound));
+	}
 }

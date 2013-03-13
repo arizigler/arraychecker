@@ -55,9 +55,10 @@ public class TestMult {
 		array19[p] = 5; // Good
 
 		p = 2; // p is [2,2]
-		// for (int i = 0; i < 5; i++) {
-		// p *= 2;
-		// }
+
+		for (int i = 0; i < 5; i++) {
+			p *= 2;
+		}
 
 		// now p is [2,INF]
 

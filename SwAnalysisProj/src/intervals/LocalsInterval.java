@@ -54,14 +54,6 @@ public class LocalsInterval {
 		}
 	}
 
-	public List getLiveLocalsAfter(Unit s) {
-		return unitToLocalsAfter.get(s);
-	}
-
-	public List getLiveLocalsBefore(Unit s) {
-		return unitToLocalsBefore.get(s);
-	}
-
 	public List getLocalsIntervalBefore(Unit s) {
 		return unitToLocalsBefore.get(s);
 	}
@@ -94,6 +86,7 @@ class LocalIntervalsAnalysis extends ForwardFlowAnalysis {
 													graph.size() * 2 + 1, 0.7f);
 	Map<Unit, Integer>	unitToVisitCount	= new HashMap<Unit, Integer>(
 													graph.size() * 2 + 1, 0.7f);
+
 	int					maxUnitVisit		= 5;
 
 	LocalIntervalsAnalysis(UnitGraph graph) {
@@ -231,8 +224,6 @@ class LocalIntervalsAnalysis extends ForwardFlowAnalysis {
 					else if (rhs instanceof DivExpr) {
 						Value op1 = ((DivExpr) rhs).getOp1();
 						Value op2 = ((DivExpr) rhs).getOp2();
-						G.v().out.println("op1 is:" + op1.toString());
-						G.v().out.println("op2 is:" + op2.toString());
 						vi = divExprInterval(variableName, op1, op2, in);
 					}
 				}
