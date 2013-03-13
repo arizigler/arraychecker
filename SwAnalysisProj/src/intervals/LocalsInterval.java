@@ -54,14 +54,6 @@ public class LocalsInterval {
 		}
 	}
 
-	public List getLiveLocalsAfter(Unit s) {
-		return unitToLocalsAfter.get(s);
-	}
-
-	public List getLiveLocalsBefore(Unit s) {
-		return unitToLocalsBefore.get(s);
-	}
-
 	public List getLocalsIntervalBefore(Unit s) {
 		return unitToLocalsBefore.get(s);
 	}
@@ -154,16 +146,16 @@ class LocalIntervalsAnalysis extends ForwardFlowAnalysis {
 
 		Unit s = (Unit) unit;
 		unitToVisitCount.put(s, unitToVisitCount.get(s) + 1);
-		
+
 		Stmt stmt = (Stmt) s;
-		
+
 		if (stmt.containsInvokeExpr()) {
 			FlowSet objFieldsToKill = getAllObjField(in);
 			killSet.union(objFieldsToKill);
 			killSet.union(unitToKillSet.get(s));
 			unitToKillSet.put(s, killSet);
 			FlowSet objFieldsToGen = changeAllToINF(objFieldsToKill);
-			genSet.union(objFieldsToGen);	
+			genSet.union(objFieldsToGen);
 		}
 
 		/* Assign statements */
@@ -208,9 +200,9 @@ class LocalIntervalsAnalysis extends ForwardFlowAnalysis {
 
 				/*
 				 * x = foo() (we do not implement inter-procedural analysis,
-				 * therefore we must assume [-INF,INF]). 
-				 * Also all object's field that we track we make them [-INF,INF] in case
-				 * the method change the field value. 
+				 * therefore we must assume [-INF,INF]). Also all object's field
+				 * that we track we make them [-INF,INF] in case the method
+				 * change the field value.
 				 */
 				else if (rhs instanceof InvokeExpr) {
 					vi = new VarInterval(variableName, new Interval(
@@ -419,31 +411,35 @@ class LocalIntervalsAnalysis extends ForwardFlowAnalysis {
 			FlowSet in) {
 		Interval i1 = getInterval(op1, in);
 		Interval i2 = getInterval(op2, in);
+
+		/* Special case: op1 == op2 */
+		if (op1 == op2) { return new VarInterval(defName, new Interval(1, 1)); }
+
 		return new VarInterval(defName, Interval.div(i1, i2));
 	}
-	
+
 	private FlowSet getAllObjField(FlowSet fs) {
 		FlowSet objFieldsSet = emptySet.clone();
 		Iterator fsIter = fs.iterator();
 		VarInterval vi = null;
 		while (fsIter.hasNext()) {
 			vi = (VarInterval) fsIter.next();
-			if (vi.getVar().contains(".")){
+			if (vi.getVar().contains(".")) {
 				objFieldsSet.add(vi);
 			}
 		}
 		return objFieldsSet;
 	}
-	
+
 	private FlowSet changeAllToINF(FlowSet fs) {
 		FlowSet objFieldsINFSet = emptySet.clone();
 		Iterator fsIter = fs.iterator();
 		VarInterval vi = null;
 		while (fsIter.hasNext()) {
 			vi = (VarInterval) fsIter.next();
-			objFieldsINFSet.add(new VarInterval(vi.getVar(), new Interval(Interval.NEGATIVE_INF,
-																		  Interval.POSITIVE_INF)));
-		}		
+			objFieldsINFSet.add(new VarInterval(vi.getVar(), new Interval(
+					Interval.NEGATIVE_INF, Interval.POSITIVE_INF)));
+		}
 		return objFieldsINFSet;
 	}
 

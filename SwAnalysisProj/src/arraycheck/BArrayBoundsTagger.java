@@ -9,22 +9,23 @@ import soot.tagkit.StringTag;
 import soot.toolkits.graph.ExceptionalUnitGraph;
 
 @SuppressWarnings({ "rawtypes" })
-public class ArrayBoundsTagger extends BodyTransformer {
+public class BArrayBoundsTagger extends BodyTransformer {
 
 	public static final String			PHASE_NAME	= "abctagger";
 	public static final String			TAG_TYPE	= "Array Bounds Check";
 
-	private static ArrayBoundsTagger	instance	= new ArrayBoundsTagger();
+	private static BArrayBoundsTagger	instance	= new BArrayBoundsTagger();
 
-	private ArrayBoundsTagger() {}
+	private BArrayBoundsTagger() {}
 
-	public static ArrayBoundsTagger v() {
+	public static BArrayBoundsTagger v() {
 		return instance;
 	}
 
 	protected void internalTransform(Body b, String phaseName, Map options) {
 
-		ArrayBoundsCheck abc = new ArrayBoundsCheck(new ExceptionalUnitGraph(b));
+		BArrayBoundsCheck abc = new BArrayBoundsCheck(new ExceptionalUnitGraph(
+				b));
 		Iterator unitIt = b.getUnits().iterator();
 
 		while (unitIt.hasNext()) {

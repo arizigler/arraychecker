@@ -1,4 +1,6 @@
 package intervals;
+
+
 public class VarInterval {
 
 	private String		m_var;
@@ -41,21 +43,11 @@ public class VarInterval {
 		VarInterval other = (VarInterval) o;
 		return (this.m_var.equals(other.getVar()) && this.m_interval
 				.equals(other.getInterval()));
-		// return (this.m_var.equals(other.getVar()));
 	}
 
-	// @Override
-	// public boolean equals(Object obj) {
-	// if (this == obj) return true;
-	// if (obj == null) return false;
-	// if (getClass() != obj.getClass()) return false;
-	// VarInterval other = (VarInterval) obj;
-	// if (m_interval == null) {
-	// if (other.m_interval != null) return false;
-	// } else if (!m_interval.equals(other.m_interval)) return false;
-	// if (m_var == null) {
-	// if (other.m_var != null) return false;
-	// } else if (!m_var.equals(other.m_var)) return false;
-	// return true;
-	// }
+	@Override
+	public VarInterval clone() {
+
+		return new VarInterval(new String(m_var), m_interval.clone());
+	}
 }

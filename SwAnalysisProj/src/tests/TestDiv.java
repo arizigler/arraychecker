@@ -24,6 +24,7 @@ public class TestDiv {
 		int i_5 = -5;
 
 		int p = 10;
+
 		array16[p] = 5; // Good
 
 		p = i20 / i4; // p is [5,5]
@@ -47,6 +48,7 @@ public class TestDiv {
 		boolean b = args.length == 0;
 
 		p = 6; // p is [6,6]
+
 		if (b) {
 			p = p / 4; // p is [4,4]
 		}
@@ -61,7 +63,7 @@ public class TestDiv {
 			p /= 2;
 		}
 
-		// now p is [0,0]
+		// Now p is [0,0]
 
 		array0[p] = 5; // Illegal upper bound
 
@@ -69,6 +71,62 @@ public class TestDiv {
 		for (int i = 0; i < 5; i++) {
 			p *= 2;
 		}
+
+		// Now p is [2,INF]
+
+		array1000[p] = 5; // Potentially illegal upper bound
+
+		for (int i = 0; i < 5; i++) {
+			p /= -1;
+		}
+
+		// Now p is [-INF,INF]
+
+		array1000[p] = 5; // Potentially illegal lower and upper bounds
+
+		int x = 0; // x is [0,0]
+
+		array5[x] = 5; // Good
+
+		x = p; // x is [-INF,INF]
+
+		array1000[x] = 5; // Potentially illegal lower and upper bounds
+
+		x = 0; // x is [0,0]
+
+		x /= p; // x is (still) [0,0]
+
+		array1000[x] = 5; // Good
+
+		x = p; // x is [-INF,INF]
+
+		x = x / x; // x is [1,1] TODO: Fix for x/=x;
+
+		array5[x] = 5; // Good
+
+		x = p; // x is [-INF,INF]
+
+		int t = 0; // t is [0,0]
+
+		array5[t] = 5; // Good
+
+		t = x / p; // dividing [-INF,INF] / [-INF,INF] ==> t is [-INF,INF]
+
+		array1000[t] = 5; // Potentially illegal lower and upper bounds
+
+		x = i0 / t; // x is [0,0]
+
+		array1000[x] = 5; // Good
+
+		x -= 1; // x is [-1,-1]
+
+		array1000[x] = 5; // Illegal lower bound
+
+		x += 1; // x is [0,0]
+
+		x = p / x; // dividing [-INF,INF] / [0,0] ==> x is [-INF,INF]
+
+		array1000[x] = 5; // Potentially illegal lower and upper bounds
 
 	}
 }

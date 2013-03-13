@@ -92,7 +92,6 @@ public class Interval {
 
 	}
 
-
 	public static Interval combine(Interval i1, Interval i2) {
 		/* [a,b] U [c,d] = [min(a,c), max(b,d)] */
 		if ((i1 != null && i1.m_isBottom) && (i2 != null && i2.m_isBottom))
@@ -135,6 +134,7 @@ public class Interval {
 			return Interval.BOTTOM;
 		if (i1 == null || i2 == null) return new Interval(NEGATIVE_INF,
 				POSITIVE_INF);
+
 		long lower, upper;
 		if (i1.getLowerBound() == NEGATIVE_INF
 				|| i2.getLowerBound() == NEGATIVE_INF) lower = NEGATIVE_INF;
@@ -387,5 +387,10 @@ public class Interval {
 		result = prime * result + (int) (m_lowerBound ^ (m_lowerBound >>> 32));
 		result = prime * result + (int) (m_upperBound ^ (m_upperBound >>> 32));
 		return result;
+	}
+
+	@Override
+	public Interval clone() {
+		return new Interval(new Long(m_lowerBound), new Long(m_upperBound));
 	}
 }
