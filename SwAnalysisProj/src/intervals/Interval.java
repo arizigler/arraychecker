@@ -128,19 +128,15 @@ public class Interval {
 	}
 
 	public static Interval negExpr(Interval i1) {
-		/* -[a,b] = [-b, -a] */
+		/* -[a,b] --> [-b, -a] */
 		if (i1 == null) return new Interval(NEGATIVE_INF, POSITIVE_INF);
 		long lower = -i1.getUpperBound();
 		long upper = -i1.getLowerBound();
-		if (i1.getUpperBound() == POSITIVE_INF)
-			lower = NEGATIVE_INF;
-		if (i1.getUpperBound() == NEGATIVE_INF)
-			lower = POSITIVE_INF;
-		if (i1.getLowerBound()== POSITIVE_INF)
-			upper = NEGATIVE_INF;
-		if (i1.getLowerBound() == NEGATIVE_INF)
-			upper = POSITIVE_INF;
-		
+		if (i1.getUpperBound() == POSITIVE_INF) lower = NEGATIVE_INF;
+		if (i1.getUpperBound() == NEGATIVE_INF) lower = POSITIVE_INF;
+		if (i1.getLowerBound() == POSITIVE_INF) upper = NEGATIVE_INF;
+		if (i1.getLowerBound() == NEGATIVE_INF) upper = POSITIVE_INF;
+
 		return new Interval(lower, upper);
 	}
 
@@ -218,39 +214,32 @@ public class Interval {
 	}
 
 	public static Interval div(Interval i1, Interval i2) {
-		if (i1 == null || i2 == null) 
-			return new Interval(NEGATIVE_INF,POSITIVE_INF);
+		if (i1 == null || i2 == null) return new Interval(NEGATIVE_INF,
+				POSITIVE_INF);
 		long l1 = i1.getLowerBound(), l2 = i2.getLowerBound();
 		long u1 = i1.getUpperBound(), u2 = i2.getUpperBound();
 
-		if (l2 == 0 && u2 ==0)
-			/* dividing by zero --> [-INF,INF] */
-			return new Interval(NEGATIVE_INF,POSITIVE_INF);
-		
-		if (l2 == 0)
-			l2 = 1;
-		if (u2 == 0)
-			u2 = -1;
-		
+		if (l2 == 0 && u2 == 0)
+		/* dividing by zero --> [-INF,INF] */
+		return new Interval(NEGATIVE_INF, POSITIVE_INF);
+
+		if (l2 == 0) l2 = 1;
+		if (u2 == 0) u2 = -1;
+
 		if (l1 != NEGATIVE_INF && l2 != NEGATIVE_INF && u1 != POSITIVE_INF
-				&& u2 != POSITIVE_INF) {
-			return new Interval(Math.min(
-					Math.min(l1 / l2, l1 / u2), Math.min(u1 / l2, u1 / u2)),
-					Math.max(Math.max(l1 / l2, l1 / u2),
-							Math.max(u1 / l2, u1 / u2)));
-		}
+				&& u2 != POSITIVE_INF) { return new Interval(
+				Math.min(Math.min(l1 / l2, l1 / u2), Math.min(u1 / l2, u1 / u2)),
+				Math.max(Math.max(l1 / l2, l1 / u2), Math.max(u1 / l2, u1 / u2))); }
 
 		long lower = 0, upper = 0;
 
 		/* negative INF */
-		if ((l1 == NEGATIVE_INF && (l2 > 0 || u2 > 0)) ||
-				u1 == POSITIVE_INF && (l2 < 0 || u2 < 0))
-			lower = NEGATIVE_INF;
+		if ((l1 == NEGATIVE_INF && (l2 > 0 || u2 > 0)) || u1 == POSITIVE_INF
+				&& (l2 < 0 || u2 < 0)) lower = NEGATIVE_INF;
 
 		/* positive INF */
 		if ((l1 == NEGATIVE_INF && (l2 < 0 || u2 < 0)) || u1 == POSITIVE_INF
-				&& (l2 > 0 || u2 > 0))
-			upper = POSITIVE_INF;
+				&& (l2 > 0 || u2 > 0)) upper = POSITIVE_INF;
 
 		if (lower == NEGATIVE_INF && upper == POSITIVE_INF) return new Interval(
 				lower, upper);
