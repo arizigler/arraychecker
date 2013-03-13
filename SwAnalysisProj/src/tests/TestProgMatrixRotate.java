@@ -94,7 +94,7 @@ public class TestProgMatrixRotate {
 		while (a == 0)
 			a++;
 		
-		arr[f/a] = 3;
+		arr[f/a] = 3; //-INF,INF potentially upper and lower OF
 	
 		
 		

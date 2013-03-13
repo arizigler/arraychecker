@@ -4,6 +4,7 @@ public class Interval {
 
 	private long			m_lowerBound;
 	private long			m_upperBound;
+	private boolean			m_isBottom;
 
 	public static long		POSITIVE_INF	= Long.MAX_VALUE;
 	public static long		NEGATIVE_INF	= Long.MIN_VALUE;
@@ -11,15 +12,33 @@ public class Interval {
 	public static Interval	ZERO			= new Interval(0, 0);
 	public static Interval	INF				= new Interval(NEGATIVE_INF,
 													POSITIVE_INF);
-
+	public static Interval	BOTTOM			= new Interval(0, 0, true);
+	
+	
 	public Interval(long lower, long upper) {
 		m_lowerBound = lower;
 		m_upperBound = upper;
+		m_isBottom = false;
 	}
 
 	public Interval(Interval inter) {
 		m_lowerBound = inter.getLowerBound();
 		m_upperBound = inter.getUpperBound();
+		m_isBottom = inter.m_isBottom;
+	}
+	
+	public Interval(long lower, long upper, boolean is_bottom) {
+		m_lowerBound = lower;
+		m_upperBound = upper;
+		m_isBottom = is_bottom;
+	}
+	
+	public void setBottom(boolean b) {
+		m_isBottom = b;
+	}
+	
+	public boolean isBottom() {
+		return m_isBottom;
 	}
 
 	public static boolean intersect(Interval i1, Interval i2) {
@@ -76,6 +95,12 @@ public class Interval {
 
 	public static Interval combine(Interval i1, Interval i2) {
 		/* [a,b] U [c,d] = [min(a,c), max(b,d)] */
+		if ((i1 != null && i1.m_isBottom) && (i2 != null && i2.m_isBottom))
+			return Interval.BOTTOM;
+		if ((i1 != null && i1.m_isBottom) && (i2 != null && !i2.m_isBottom))
+			return new Interval(i2);
+		if ((i1 != null && !i1.m_isBottom) && (i2 != null && i2.m_isBottom))
+			return new Interval(i1); 
 		if (i1 == null || i2 == null) return new Interval(NEGATIVE_INF,
 				POSITIVE_INF);
 
@@ -86,6 +111,8 @@ public class Interval {
 
 	public static Interval convergentInterval(Interval oldInter,
 			Interval newInter) {
+		if (oldInter.isBottom() || newInter.isBottom())
+			return Interval.BOTTOM;
 		if (newInter.getUpperBound() > oldInter.getUpperBound() &&
 				!(newInter.getLowerBound() < oldInter.getLowerBound())) {
 			return new Interval(oldInter.getLowerBound(),POSITIVE_INF);
@@ -104,6 +131,8 @@ public class Interval {
 
 	public static Interval addExpr(Interval i1, Interval i2) {
 		/* [a,b] + [c,d] = [a + c, b + d] */
+		if ((i1 != null && i1.m_isBottom) || (i2 != null && i2.m_isBottom)) 
+			return Interval.BOTTOM;
 		if (i1 == null || i2 == null) return new Interval(NEGATIVE_INF,
 				POSITIVE_INF);
 		long lower, upper;
@@ -118,6 +147,8 @@ public class Interval {
 
 	public static Interval subExpr(Interval i1, Interval i2) {
 		/* [a,b] - [c,d] = [a - d, b - c] */
+		if ((i1 != null && i1.m_isBottom) || (i2 != null && i2.m_isBottom)) 
+			return Interval.BOTTOM;
 		if (i1 == null || i2 == null) return new Interval(NEGATIVE_INF,
 				POSITIVE_INF);
 		long lower, upper;
@@ -132,6 +163,8 @@ public class Interval {
 
 	public static Interval negExpr(Interval i1) {
 		/* -[a,b] = [-b, -a] */
+		if (i1 != null && i1.m_isBottom)
+			return Interval.BOTTOM;	
 		if (i1 == null) return new Interval(NEGATIVE_INF, POSITIVE_INF);
 		long lower = -i1.getUpperBound();
 		long upper = -i1.getLowerBound();
@@ -152,6 +185,8 @@ public class Interval {
 		 * [a, b] × [c, d] = [min (a × c, a × d, b × c, b × d), max (a ×
 		 * c, a × d, b × c, b × d)]
 		 */
+		if ((i1 != null && i1.m_isBottom) || (i2 != null && i2.m_isBottom))
+			return Interval.BOTTOM;
 		if (i1 == null || i2 == null) return new Interval(NEGATIVE_INF,
 				POSITIVE_INF);
 
@@ -221,6 +256,8 @@ public class Interval {
 	}
 
 	public static Interval div(Interval i1, Interval i2) {
+		if ((i1 != null && i1.m_isBottom) || (i2 != null && i2.m_isBottom))
+			return Interval.BOTTOM;
 		if (i1 == null || i2 == null) 
 			return new Interval(NEGATIVE_INF,POSITIVE_INF);
 		long l1 = i1.getLowerBound(), l2 = i2.getLowerBound();
@@ -315,6 +352,9 @@ public class Interval {
 	@Override
 	public boolean equals(Object obj) {
 		Interval other = (Interval) obj;
+		if (this.isBottom() && other.isBottom()) {
+			return true;
+		}
 		return (this.m_lowerBound == other.getLowerBound() && this.m_upperBound == other
 				.getUpperBound());
 	}
