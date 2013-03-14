@@ -64,7 +64,7 @@ public class TestMult {
 
 		// now p is [2,INF]
 
-		array19[p] = 5; // Potentially illegal upper bound
+		array19[p] = 5; // Potentially illegal upper bound // TODO problem
 
 		p = p - 4; // p is [-2,INF]
 
@@ -73,8 +73,8 @@ public class TestMult {
 		p = 2; // p is [2,2]
 
 		for (int i = 0; i < 5; i++) {
-			array3[i] = 5;
-			array16[i] = 5;
+			array3[i] = 5; // Potentially illegal upper bound
+			array16[i] = 5; // Good
 			p *= -2;
 		}
 

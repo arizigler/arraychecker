@@ -23,8 +23,8 @@ public class PresentationTest2 {
 			array0[i] = 5; // Good (because we won't get here)
 
 		for (int i = 0; i < 7; i++) {
-			array0[i] = 5; // Potentially illegal upper bound
-			array5[i] = 5; // Potentially illegal upper bound
+			array0[i] = 5; // Potentially illegal upper bound // TODO problem
+			array5[i] = 5; // Potentially illegal upper bound // TODO problem
 			array7[i] = 5; // Good
 		}
 
@@ -224,7 +224,7 @@ public class PresentationTest2 {
 			// can be only if e is 2
 			array3[e] = 5; // Good
 		else
-			array3[e] = 5; // Potentially illegal upper bound	
+			array3[e] = 5; // Potentially illegal upper bound	// TODO problem
 		
 	/* operator > */
 		
@@ -233,7 +233,7 @@ public class PresentationTest2 {
 			// can be only if e is 2
 			array3[e] = 5; // Good
 		else
-			array3[e] = 5; // Potentially illegal upper bound
+			array3[e] = 5; // Potentially illegal upper bound // TODO problem
 
 /* Widening */		
 		

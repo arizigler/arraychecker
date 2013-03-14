@@ -129,7 +129,7 @@ public class TestObjFields {
 
 		// now p is [2,INF]
 
-		array17[tof.f] = 5; // Potentially illegal upper bound
+		array17[tof.f] = 5; // Potentially illegal upper bound // TODO problem
 
 		f = foo(3);
 		
