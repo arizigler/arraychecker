@@ -34,7 +34,7 @@ public class PresentationTest1 {
 		final int i100 = 100; // i100 is [100,100]
 		final int i500 = 500; // i500 is [500,500]
 
-		/* Trivial cases */
+	/* Trivial cases */
 
 		array10[5] = 5; // OK
 
@@ -48,7 +48,7 @@ public class PresentationTest1 {
 
 		array10[i20] = 5; // Illegal upper bound
 
-		/* Interval Arithmetic */
+	/* Interval Arithmetic */
 
 		int p = 1; // p is [1,1]
 
@@ -94,7 +94,7 @@ public class PresentationTest1 {
 
 		array10[p] = 5; // OK
 
-		/* Changing array size */
+	/* Changing array size */
 		int arrayA[] = new int[i50];
 		int arrayB[] = new int[i100];
 
@@ -114,7 +114,7 @@ public class PresentationTest1 {
 
 		arrayA[i20] = 5; // Potentially illegal upper bound
 
-		/* Tracking class fields */
+	/* Tracking class fields */
 
 		this.iField5 = 5; // iField5 is [5,5]
 
