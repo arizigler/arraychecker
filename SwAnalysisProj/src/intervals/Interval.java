@@ -245,16 +245,26 @@ public class Interval {
 	}
 
 	public static Interval div(Interval i1, Interval i2) {
-		if ((i1 != null && i1.isBottom()) || (i2 != null && i2.isBottom())) return Interval.BOTTOM;
-		if (i1 == null || i2 == null) return new Interval(NEGATIVE_INF,
-				POSITIVE_INF);
+		if ((i1 != null && i1.isBottom()) || (i2 != null && i2.isBottom())) 
+			return Interval.BOTTOM;
+		if (i1 == null || i2 == null) 
+			return new Interval(NEGATIVE_INF,POSITIVE_INF);
 		long l1 = i1.getLowerBound(), l2 = i2.getLowerBound();
 		long u1 = i1.getUpperBound(), u2 = i2.getUpperBound();
 
 		if (l2 == 0 && u2 == 0)
 		/* dividing by zero --> [-INF,INF] */
-		return new Interval(NEGATIVE_INF, POSITIVE_INF);
+			return new Interval(NEGATIVE_INF, POSITIVE_INF);
 
+		if ((l2 <= -1 && u2 >= -1) && (l2 <= 1 && u2 >= 1)) {
+			// Division by an interval containing zero is not defined under the basic interval arithmetic
+			if (l1 == POSITIVE_INF || l1 == NEGATIVE_INF || u1 == POSITIVE_INF || u1 == NEGATIVE_INF) {
+				return new Interval(NEGATIVE_INF,POSITIVE_INF);
+			}
+			long val = Math.max(Math.abs(l1), Math.abs(u1));
+			return new Interval(-val,val);
+		}
+		
 		if (l2 == 0) l2 = 1;
 		if (u2 == 0) u2 = -1;
 

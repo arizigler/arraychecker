@@ -65,7 +65,7 @@ public class TestDiv {
 
 		// Now p is [0,0]
 
-		array0[p] = 5; // Illegal upper bound
+		array0[p] = 5; // Illegal upper bound 
 
 		p = 2; // p is [2,2]
 		for (int i = 0; i < 5; i++) {

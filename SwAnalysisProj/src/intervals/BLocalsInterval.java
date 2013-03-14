@@ -65,7 +65,7 @@ class BLocalIntervalsAnalysis extends ForwardBranchedFlowAnalysis {
 	Map<Unit, Integer>	unitToVisitCount	= new HashMap<Unit, Integer>(
 													graph.size() * 2 + 1, 0.7f);
 
-	int					maxUnitVisit		= 50;
+	int					maxUnitVisit		= 200;
 
 	BLocalIntervalsAnalysis(UnitGraph graph) {
 		super(graph);
@@ -179,7 +179,6 @@ class BLocalIntervalsAnalysis extends ForwardBranchedFlowAnalysis {
 					else if (rhs instanceof Local || rhs instanceof FieldRef
 							|| rhs instanceof ArrayRef) {
 						VarInterval rhsVi = flowSetContain(in, rhs.toString());
-						// TODO : maybe assert in case it null (only for local)
 						if (rhsVi != null) {
 							vi = new VarInterval(variableName,
 									rhsVi.getInterval());
