@@ -127,24 +127,11 @@ public class TestConditionsAndLoops {
 			}
 		}
 		
-		a = 0; // a is [0,0]
-		while (b1)
-			a++;
+		boolean b2 = args.length <= 2;
 		
-		// a is [0,INF]
-		array5[a] = 5; // Potentially illegal upper bound
-		array20[a] = 5; //Potentially illegal upper bound
-		
-		while (b1)
-			a--;
+		int d = -3;
 		
 		// a is [-INF,INF]
-		array5[a] = 5; // Potentially illegal upper and lower bounds
-		array20[a] = 5; //Potentially illegal upper and lower bounds		
-		
-		boolean b2 = args.length > 2;
-		
-		int d = -3; 
 		if (b2)
 			d = 8;
 		
@@ -163,11 +150,53 @@ public class TestConditionsAndLoops {
 		
 		if (d <= e)
 			f = d;
-			
+		
 		// f is [-3,4] and not [-3,8] 
 		array5[f] = 5; // Potentially illegal lower bound
 		array7[f] = 5; // Potentially illegal lower bound			
-			
+		
+		
+		d = -3; 
+		if (b2)
+			d = 8;
+		
+		// d is [-3,8]
+		
+		e = 2;
+		if (b2)
+			e = 4;
+		
+		// e is [2,4]
+		
+		f = 2; // f is [2,2]
+		
+		array5[f] = 5; // Good
+		array7[f] = 5; // Good
+		
+		if (!(d != e))
+			f = d;
+		
+		// f is [2,4] and not [-3,8] 
+		array5[f] = 5; // Good
+		array7[f] = 5; // Good	
+		
+		
+		a = 0; // a is [0,0]
+		while (b1)
+			a++;
+		
+		// a is [0,INF]
+		array5[a] = 5; // Potentially illegal upper bound
+		array20[a] = 5; //Potentially illegal upper bound
+		
+		while (b1)
+			a--;
+		
+		// a is [-INF,INF]
+		array5[a] = 5; // Potentially illegal upper and lower bounds
+		array20[a] = 5; //Potentially illegal upper and lower bounds		
+		
+		
 	}
 
 }

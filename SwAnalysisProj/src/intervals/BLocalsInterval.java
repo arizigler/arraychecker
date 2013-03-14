@@ -84,7 +84,7 @@ class BLocalIntervalsAnalysis extends ForwardBranchedFlowAnalysis {
 	Map<Unit, Integer>	unitToVisitCount	= new HashMap<Unit, Integer>(
 													graph.size() * 2 + 1, 0.7f);
 
-	int					maxUnitVisit		= 50;
+	int					maxUnitVisit		= 500;
 
 	BLocalIntervalsAnalysis(UnitGraph graph) {
 		super(graph);
