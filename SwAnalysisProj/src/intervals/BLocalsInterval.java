@@ -272,6 +272,8 @@ class BLocalIntervalsAnalysis extends ForwardBranchedFlowAnalysis {
 								viToKill.getInterval(), vi.getInterval());
 						genSet.add(new VarInterval(variableName, ci));
 					} else if (vi != null) {
+						if ((viToKill != null) && (viToKill.getInterval().isBottom()))
+							vi.getInterval().setBottom(true);
 						genSet.add(vi);
 					}
 				}
