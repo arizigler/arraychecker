@@ -5,10 +5,27 @@ public class TestProgMatrixRotate {
 	public static void rotate() {
 		int a,b,c,d,e,f;
 		int[] arr = new int[10];
-		f = 0;
-		while (f < 0){
+		int boo = 0;
+		f = 1;
+		
+		while (boo < f){
+			f++;
+			boo++;
+		}
+		// boo 0,INF
+		f=1;
+		//boo 0,2
+		while (boo > f){
+			//boo 2,INF
+			f--;
+			boo--;
+		} // boo -INF,INF
+		//boo -INF,INF
+		f=0;
+		while (boo < 1000){
 			f++;
 			f--;
+			
 		}
 		// f 0,0
 		arr[f] = 2;  // good
@@ -22,23 +39,24 @@ public class TestProgMatrixRotate {
 		
 		
 		
-		if (a > b){
+		if (boo < 1000){
 			arr[a] = b; // Good, but we won't cat here anyway
 		}
 		else
-			b = -a;
-		// b -3,-3
+			b = -a;//-3,-3
+		
+		// b -3,6
 		
 		arr[b] = a; // potentially lower bound OF
 		
 		b = -b;
-		// b is [3,3]
+		// b is [-6,3]
 		
-		arr[b] = a; // Good
+		arr[b] = a; // potentially lower bound OF
 	
 		
 		b = -1; // -1,-1
-		while (a > 0)
+		while (boo < 1000)
 			b--;
 		// b -INF,-1
 		arr[b] = 4; //lower bound OF
@@ -53,7 +71,7 @@ public class TestProgMatrixRotate {
 		
 		arr[b*2*e] = 3; // 9,INF  potentially upper bound OF
 		
-		if (a > 0)
+		if (boo < 1000)
 			 e = 9;
 		
 		// e 9,9
@@ -61,28 +79,28 @@ public class TestProgMatrixRotate {
 		arr[e] = 0; // Good
 		
 		f = 2*e; //f 18,18
-		if (a < 0)
+		if (boo < 1000)
 			f = 12; 
 		//f 18,18
 		arr[f]  = 2; // upper bound OF
-		if (a < 0)
+		if (boo < 1000)
 			f = 0;
-		//f 18,18
+		//f 0,18
 		
 		arr[f/2] = 3; //Good
 		
-		while (f < 0){
+		while (boo < 1000){
 			f++;
 			f--;
 		}
 		
-		arr[f] = 2;  // 18,18 potentially upper bound OF
+		arr[f] = 2;  // 0,18 potentially upper bound OF
 		
-		while (f  < 0) {
+		while (boo < 1000) {
 			f++;
 		}
 		
-		while (f < 0) {
+		while (boo < 1000) {
 			f--;
 		}
 		
@@ -90,7 +108,7 @@ public class TestProgMatrixRotate {
 		
 		a = 0;
 		
-		while (a == 0)
+		while (boo < 1000)
 			a++;
 		
 		arr[f/a] = 3; //-INF,INF potentially upper and lower OF
