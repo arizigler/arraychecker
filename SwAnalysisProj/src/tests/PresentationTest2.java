@@ -85,7 +85,7 @@ public class PresentationTest2 {
 		}
 		
 		// now c is [15,15]
-		array5[c] = 5; // illegal upper bound
+		array5[c] = 5; // illegal upper bound // TODO problem
 		array16[c] = 5; // Good
 		
 		a = 12; // a is [12,12]
