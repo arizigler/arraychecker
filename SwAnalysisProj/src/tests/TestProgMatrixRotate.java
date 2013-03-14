@@ -23,20 +23,18 @@ public class TestProgMatrixRotate {
 		
 		
 		if (a > b){
-			arr[a] = b;
+			arr[a] = b; // Good, but we won't cat here anyway
 		}
 		else
 			b = -a;
-		// b -3,3
+		// b -3,-3
 		
 		arr[b] = a; // potentially lower bound OF
 		
 		b = -b;
+		// b is [3,3]
 		
-		arr[b] = a; // potentially lower bound OF
-		
-	
-		
+		arr[b] = a; // Good
 	
 		
 		b = -1; // -1,-1
@@ -58,17 +56,18 @@ public class TestProgMatrixRotate {
 		if (a > 0)
 			 e = 9;
 		
-		// e 5,9
+		// e 9,9
 		
 		arr[e] = 0; // Good
 		
-		f = 2*e; //f 10,18
+		f = 2*e; //f 18,18
 		if (a < 0)
-			f = 12; //f 10,18
+			f = 12; 
+		//f 18,18
 		arr[f]  = 2; // upper bound OF
 		if (a < 0)
 			f = 0;
-		//f 0,18
+		//f 18,18
 		
 		arr[f/2] = 3; //Good
 		
@@ -77,7 +76,7 @@ public class TestProgMatrixRotate {
 			f--;
 		}
 		
-		arr[f] = 2;  // 0,18 potentially upper bound OF
+		arr[f] = 2;  // 18,18 potentially upper bound OF
 		
 		while (f  < 0) {
 			f++;

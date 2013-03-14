@@ -73,7 +73,7 @@ public class BLocalsInterval {
 	}
 }
 
-@SuppressWarnings({ "unchecked", "rawtypes" })
+@SuppressWarnings({ "rawtypes" })
 class BLocalIntervalsAnalysis extends ForwardBranchedFlowAnalysis {
 
 	FlowSet				emptySet			= new ArraySparseSet();

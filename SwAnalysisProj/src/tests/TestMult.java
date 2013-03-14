@@ -9,6 +9,7 @@ public class TestMult {
 		int array0[] = new int[0];
 		int array3[] = new int[3];
 		int array5[] = new int[5];
+		int array15[] = new int[15];
 		int array16[] = new int[16];
 		int array17[] = new int[17];
 		int array19[] = new int[19];
