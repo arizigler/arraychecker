@@ -25,13 +25,13 @@ public class TestConditionsAndLoops {
 		for (int i = 0; i < 7; i++) {
 			array0[i] = 5; // Potentially illegal upper bound
 			array5[i] = 5; // Potentially illegal upper bound
-			array7[i] = 5;
+			array7[i] = 5; // Good
 		}
 
 		int a = 1; // a is [1,1]
 		int b = -3; // b is [-3,-3]
 
-		array5[b] = 5; // Potentially illegal lower bound
+		array5[b] = 5; // illegal lower bound
 
 		if (b < a) {
 			b = b + 4;
@@ -40,7 +40,8 @@ public class TestConditionsAndLoops {
 		// now b is [1,1]
 		array5[b] = 5; // Good
 
-		if (b < a) b = b + 20;
+		if (b < a) 
+			b = b + 20;
 
 		// b still [1,1]
 		array5[b] = 5; // Good
@@ -48,10 +49,16 @@ public class TestConditionsAndLoops {
 		while (a < 15)
 			a++;
 
-		// a is [15,15]
+		// a is [15,15] 
 		array16[a] = 5; // Good
-
-		if (b0) a = a + 5;
+		
+		a = a - 2; // a is [13,13]
+		array16[a] = 5; // Good
+		
+		a = a + 2; // a is [15,15]
+			
+		if (b0) 
+			a = a + 5;
 
 		// now a is [15,20]
 		array16[a] = 5; // Potentially illegal upper bound
@@ -61,7 +68,7 @@ public class TestConditionsAndLoops {
 		array16[c] = 5; // illegal lower bound
 		
 		if (!((b < a) || (c < 0)))
-			c = c - 8;
+			c = c - 8; // we won't get here
 		else
 			c = c + 8;
 
@@ -97,9 +104,8 @@ public class TestConditionsAndLoops {
 		
 		array5[c] = 5; // Good
 		array16[c] = 5; // Good
-		
-		
-		a = 1;
+				
+		a = 1; // a is [1,1]
 		
 		array5[a] = 5; // Good
 		
@@ -108,19 +114,60 @@ public class TestConditionsAndLoops {
 			array5[a] = 5; // Good (we won't get here)
 		}
 		
-		a = a-1;
+		// a is [1,1]
+		a = a-1; 
+		// a is [0,0]
 		array5[a] = 5; // Good		
 		
 		int i , j = 0; // i, j are [0,0]
 		for (i=0; i<10; i++) {
-			for (j=0; i<10; j++) {
-				array18[i+j] = 5; // illegal upper bound
+			for (j=0; j<10; j++) {
+				array18[i+j] = 5; // illegal upper bound (max i+j is 18)
 				array20[i+j] = 5; // Good
 			}
 		}
 		
-
+		a = 0; // a is [0,0]
+		while (b1)
+			a++;
 		
+		// a is [0,INF]
+		array5[a] = 5; // Potentially illegal upper bound
+		array20[a] = 5; //Potentially illegal upper bound
+		
+		while (b1)
+			a--;
+		
+		// a is [-INF,INF]
+		array5[a] = 5; // Potentially illegal upper and lower bounds
+		array20[a] = 5; //Potentially illegal upper and lower bounds		
+		
+		boolean b2 = args.length > 2;
+		
+		int d = -3; 
+		if (b2)
+			d = 8;
+		
+		// d is [-3,8]
+		
+		int e = 2;
+		if (b2)
+			e = 4;
+		
+		// e is [2,4]
+		
+		int f = 0; // f is [0,0]
+		
+		array5[f] = 5; // Good
+		array7[f] = 5; // Good
+		
+		if (d <= e)
+			f = d;
+			
+		// f is [-3,4] and not [-3,8] 
+		array5[f] = 5; // Potentially illegal lower bound
+		array7[f] = 5; // Potentially illegal lower bound			
+			
 	}
 
 }
