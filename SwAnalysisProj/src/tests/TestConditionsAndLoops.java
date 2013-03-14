@@ -10,7 +10,7 @@ public class TestConditionsAndLoops {
 		int array5[] = new int[5];
 		int array7[] = new int[7];
 		int array16[] = new int[16];
-		int array19[] = new int[19];
+		int array18[] = new int[18];
 		int array20[] = new int[20];
 		
 
@@ -98,11 +98,24 @@ public class TestConditionsAndLoops {
 		array5[c] = 5; // Good
 		array16[c] = 5; // Good
 		
+		
+		a = 1;
+		
+		array5[a] = 5; // Good
+		
+		while (a < 0) {
+			a = -1;
+			array5[a] = 5; // Good (we won't get here)
+		}
+		
+		a = a-1;
+		array5[a] = 5; // Good		
+		
 		int i , j = 0; // i, j are [0,0]
 		for (i=0; i<10; i++) {
 			for (j=0; i<10; j++) {
-				array19[i+j] = 5; // Good
-				array20[i+j] = 5; // illegal upper bound
+				array18[i+j] = 5; // illegal upper bound
+				array20[i+j] = 5; // Good
 			}
 		}
 		

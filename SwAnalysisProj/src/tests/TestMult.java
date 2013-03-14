@@ -87,9 +87,9 @@ public class TestMult {
 		// now i is [5,15], j is [10,20]
 
 		if (i != j) {
-			array20[j] = 5;
+			array16[j] = 5; // Potentially illegal upper bound
 		} else {
-			array20[j] = 5;
+			array16[j] = 5; // Good
 		}
 
 		// p is [-INF,INF]
