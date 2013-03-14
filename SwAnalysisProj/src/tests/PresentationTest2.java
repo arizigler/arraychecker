@@ -84,8 +84,8 @@ public class PresentationTest2 {
 			c = i;
 		}
 		
-		// now c is [15,15]
-		array5[c] = 5; // illegal upper bound // TODO problem
+		// now c is [1,15]
+		array5[c] = 5; // Potentially illegal upper bound
 		array16[c] = 5; // Good
 		
 		a = 12; // a is [12,12]
@@ -224,7 +224,7 @@ public class PresentationTest2 {
 			// can be only if e is 2
 			array3[e] = 5; // Good
 		else
-			array3[e] = 5; // Potentially illegal upper bound	// TODO problem
+			array3[e] = 5; // illegal upper bound
 		
 	/* operator > */
 		
@@ -233,7 +233,7 @@ public class PresentationTest2 {
 			// can be only if e is 2
 			array3[e] = 5; // Good
 		else
-			array3[e] = 5; // Potentially illegal upper bound // TODO problem
+			array3[e] = 5; // illegal upper bound
 
 /* Widening */		
 		
