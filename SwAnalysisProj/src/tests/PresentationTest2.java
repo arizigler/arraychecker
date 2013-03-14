@@ -24,7 +24,7 @@ public class PresentationTest2 {
 
 		for (int i = 0; i < 7; i++) {
 			array0[i] = 5; // illegal upper bound
-			array5[i] = 5; // illegal upper bound
+			array5[i] = 5; // Potentially illegal upper bound
 			array7[i] = 5; // Good
 		}
 

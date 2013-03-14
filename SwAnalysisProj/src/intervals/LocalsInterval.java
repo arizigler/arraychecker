@@ -14,7 +14,7 @@ public class LocalsInterval {
 	protected Map<Unit, List>	unitToLocalsAfter;
 
 	public LocalsInterval(UnitGraph graph) {
-		LocalIntervalsAnalysis analysis = new LocalIntervalsAnalysis(graph);
+		BLocalIntervalsAnalysis analysis = new BLocalIntervalsAnalysis(graph);
 
 		// Build unitToLocals map
 		unitToLocalsAfter = new HashMap<Unit, List>(graph.size() * 2 + 1, 0.7f);
@@ -29,9 +29,6 @@ public class LocalsInterval {
 			unitToLocalsBefore.put(s,
 					Collections.unmodifiableList(set.toList()));
 
-			set = (FlowSet) analysis.getFlowAfter(s);
-			unitToLocalsAfter
-					.put(s, Collections.unmodifiableList(set.toList()));
 		}
 	}
 
@@ -57,8 +54,8 @@ public class LocalsInterval {
 	}
 }
 
-@SuppressWarnings({ "unchecked", "rawtypes" })
-class LocalIntervalsAnalysis extends ForwardFlowAnalysis {
+@SuppressWarnings({ "rawtypes" })
+class BLocalIntervalsAnalysis extends ForwardBranchedFlowAnalysis {
 
 	FlowSet				emptySet			= new ArraySparseSet();
 	Map<Unit, FlowSet>	unitToGenerateSet	= new HashMap<Unit, FlowSet>(
@@ -67,9 +64,10 @@ class LocalIntervalsAnalysis extends ForwardFlowAnalysis {
 													graph.size() * 2 + 1, 0.7f);
 	Map<Unit, Integer>	unitToVisitCount	= new HashMap<Unit, Integer>(
 													graph.size() * 2 + 1, 0.7f);
-	int					maxUnitVisit		= 3;
 
-	LocalIntervalsAnalysis(UnitGraph graph) {
+	int					maxUnitVisit		= 50;
+
+	BLocalIntervalsAnalysis(UnitGraph graph) {
 		super(graph);
 		Iterator unitIt = graph.iterator();
 
@@ -80,22 +78,6 @@ class LocalIntervalsAnalysis extends ForwardFlowAnalysis {
 			FlowSet genSet = emptySet.clone();
 			FlowSet killSet = emptySet.clone();
 
-			// if (s instanceof AssignStmt) {
-			// Value lhs = ((AssignStmt) s).getLeftOp();
-			// Value rhs = ((AssignStmt) s).getRightOp();
-			//
-			// if (lhs instanceof Local && rhs instanceof IntConstant) genSet
-			// .add(new VarInterval(lhs.toString(), new Interval(
-			// ((IntConstant) rhs).value,
-			// ((IntConstant) rhs).value)));
-			//
-			// /* Create kill set for the variable definition */
-			// killSet.add(new VarInterval(lhs.toString(), Interval.EMPTY));
-			// }
-			// /* This is not a local variable definition */
-			// else {
-			// /* nothing to do */
-			// }
 			unitToGenerateSet.put(s, genSet);
 			unitToKillSet.put(s, killSet);
 		}
@@ -116,187 +98,209 @@ class LocalIntervalsAnalysis extends ForwardFlowAnalysis {
 		return emptySet.clone();
 	}
 
-	/**
-	 * OUT is the same as IN plus the genSet.
-	 **/
-	protected void flowThrough(Object inValue, Object unit, Object outValue) {
+	@Override
+	protected void flowThrough(Object inValue, Unit u, List fallOut,
+			List branchOuts) {
 
-		FlowSet in = (FlowSet) inValue, out = (FlowSet) outValue;
+		FlowSet in = (FlowSet) inValue;
 		FlowSet genSet = emptySet.clone();
 		FlowSet killSet = emptySet.clone();
 
-		Unit s = (Unit) unit;
-		unitToVisitCount.put(s, unitToVisitCount.get(s) + 1);
+		unitToVisitCount.put(u, unitToVisitCount.get(u) + 1);
 
-		Stmt stmt = (Stmt) s;
+		/* If statement */
+		if (u instanceof IfStmt) {
 
-		if (stmt.containsInvokeExpr()) {
-			FlowSet objFieldsToKill = getAllObjField(in);
-			killSet.union(objFieldsToKill);
-			killSet.union(unitToKillSet.get(s));
-			unitToKillSet.put(s, killSet);
-			FlowSet objFieldsToGen = changeAllToINF(objFieldsToKill);
-			genSet.union(objFieldsToGen);
+			IfStmt ifStmt = (IfStmt) u;
+			Value condition = ifStmt.getCondition();
+
+			/* Constructing branchOuts */
+			for (Iterator it = branchOuts.iterator(); it.hasNext();) {
+
+				FlowSet fs = (FlowSet) it.next();
+				FlowSet newSet = cloneSet(in);
+
+				analyzeCondition(true, condition, newSet);
+				newSet.union(unitToGenerateSet.get(u), fs);
+
+			}
+			/* Constructing fallOuts */
+			for (Iterator it = fallOut.iterator(); it.hasNext();) {
+
+				FlowSet fs = (FlowSet) it.next();
+				FlowSet newSet = cloneSet(in);
+
+				analyzeCondition(false, condition, newSet);
+				newSet.union(unitToGenerateSet.get(u), fs);
+			}
 		}
 
-		/* Assign statements */
-		if (s instanceof AssignStmt) {
+		/* Not an if statement */
+		else {
+			Stmt stmt = (Stmt) u;
 
-			Value lhs = ((AssignStmt) s).getLeftOp();
-			Value rhs = ((AssignStmt) s).getRightOp();
+			if (stmt.containsInvokeExpr()) {
+				FlowSet objFieldsToKill = getAllObjField(in);
+				killSet.union(objFieldsToKill);
+				killSet.union(unitToKillSet.get(u));
+				unitToKillSet.put(u, killSet);
+				FlowSet objFieldsToGen = changeAllToINF(objFieldsToKill);
+				genSet.union(objFieldsToGen);
+			}
 
-			if ((lhs instanceof Local || lhs instanceof FieldRef)
-					&& lhs.getType() instanceof IntType) {
-				String variableName = lhs.toString();
+			/* Assign statements */
+			if (u instanceof AssignStmt) {
 
-				/* Kill previous interval */
-				VarInterval viToKill = flowSetContain(in, variableName);
-				if (viToKill != null) {
-					killSet.add(viToKill);
-					killSet.union(unitToKillSet.get(s));
+				Value lhs = ((AssignStmt) u).getLeftOp();
+				Value rhs = ((AssignStmt) u).getRightOp();
 
-					unitToKillSet.put(s, killSet);
-				}
-				VarInterval vi = null;
+				if ((lhs instanceof Local || lhs instanceof FieldRef)
+						&& lhs.getType() instanceof IntType) {
+					String variableName = lhs.toString();
 
-				/* x = const */
-				if (rhs instanceof IntConstant) {
-					vi = new VarInterval(variableName, new Interval(
-							((IntConstant) rhs).value,
-							((IntConstant) rhs).value));
-				}
+					/* Kill previous interval */
+					VarInterval viToKill = flowSetContain(in, variableName);
+					if (viToKill != null) {
+						killSet.add(viToKill);
+						killSet.union(unitToKillSet.get(u));
 
-				/* x = y or x = o.y or x = arr[y] */
-				else if (rhs instanceof Local || rhs instanceof FieldRef
-						|| rhs instanceof ArrayRef) {
-					VarInterval rhsVi = flowSetContain(in, rhs.toString());
-					// TODO : maybe assert in case it null (only for local)
-					if (rhsVi != null) {
-						vi = new VarInterval(variableName, rhsVi.getInterval());
-					} else {
+						unitToKillSet.put(u, killSet);
+					}
+					VarInterval vi = null;
+
+					/* x = const */
+					if (rhs instanceof IntConstant) {
+						vi = new VarInterval(variableName, new Interval(
+								((IntConstant) rhs).value,
+								((IntConstant) rhs).value));
+					}
+
+					/* x = y or x = o.y or x = arr[y] */
+					else if (rhs instanceof Local || rhs instanceof FieldRef
+							|| rhs instanceof ArrayRef) {
+						VarInterval rhsVi = flowSetContain(in, rhs.toString());
+						// TODO : maybe assert in case it null (only for local)
+						if (rhsVi != null) {
+							vi = new VarInterval(variableName,
+									rhsVi.getInterval());
+						} else {
+							vi = new VarInterval(variableName, new Interval(
+									Interval.NEGATIVE_INF,
+									Interval.POSITIVE_INF));
+						}
+					}
+
+					/*
+					 * x = foo() (we do not implement inter-procedural analysis,
+					 * therefore we must assume [-INF,INF]). Also all object's
+					 * field that we track we make them [-INF,INF] in case the
+					 * method change the field value.
+					 */
+					else if (rhs instanceof InvokeExpr) {
 						vi = new VarInterval(variableName, new Interval(
 								Interval.NEGATIVE_INF, Interval.POSITIVE_INF));
 					}
-				}
 
-				/*
-				 * x = foo() (we do not implement inter-procedural analysis,
-				 * therefore we must assume [-INF,INF]). Also all object's field
-				 * that we track we make them [-INF,INF] in case the method
-				 * change the field value.
-				 */
-				else if (rhs instanceof InvokeExpr) {
-					vi = new VarInterval(variableName, new Interval(
-							Interval.NEGATIVE_INF, Interval.POSITIVE_INF));
-				}
+					/* Binary operations */
+					else if (rhs instanceof BinopExpr) {
+						/* x = a + b */
+						if (rhs instanceof AddExpr) {
+							Value op1 = ((AddExpr) rhs).getOp1();
+							Value op2 = ((AddExpr) rhs).getOp2();
+							vi = addExprInterval(variableName, op1, op2, in);
+						}
 
-				/* Binary operations */
-				else if (rhs instanceof BinopExpr) {
-					/* x = a + b */
-					if (rhs instanceof AddExpr) {
-						Value op1 = ((AddExpr) rhs).getOp1();
-						Value op2 = ((AddExpr) rhs).getOp2();
-						vi = addExprInterval(variableName, op1, op2, in);
+						/* x = a - b */
+						else if (rhs instanceof SubExpr) {
+							Value op1 = ((SubExpr) rhs).getOp1();
+							Value op2 = ((SubExpr) rhs).getOp2();
+							vi = subExprInterval(variableName, op1, op2, in);
+						}
+
+						/* x = a * b */
+						else if (rhs instanceof MulExpr) {
+							Value op1 = ((MulExpr) rhs).getOp1();
+							Value op2 = ((MulExpr) rhs).getOp2();
+							vi = mulExprInterval(variableName, op1, op2, in);
+						}
+
+						/* x = a / b */
+						else if (rhs instanceof DivExpr) {
+							Value op1 = ((DivExpr) rhs).getOp1();
+							Value op2 = ((DivExpr) rhs).getOp2();
+							vi = divExprInterval(variableName, op1, op2, in);
+						}
 					}
 
-					/* x = a - b */
-					else if (rhs instanceof SubExpr) {
-						Value op1 = ((SubExpr) rhs).getOp1();
-						Value op2 = ((SubExpr) rhs).getOp2();
-						vi = subExprInterval(variableName, op1, op2, in);
+					/* Unary operations */
+					else if (rhs instanceof NegExpr) {
+						Value op = ((NegExpr) rhs).getOp();
+						vi = negExprInterval(variableName, op, in);
 					}
 
-					/* x = a * b */
-					else if (rhs instanceof MulExpr) {
-						Value op1 = ((MulExpr) rhs).getOp1();
-						Value op2 = ((MulExpr) rhs).getOp2();
-						vi = mulExprInterval(variableName, op1, op2, in);
+					/*
+					 * For all other creatures we do not their values, must
+					 * assume [-INF,INF]
+					 */
+					else {
+						vi = new VarInterval(variableName, new Interval(
+								Interval.NEGATIVE_INF, Interval.POSITIVE_INF));
 					}
 
-					/* x = a / b */
-					else if (rhs instanceof DivExpr) {
-						Value op1 = ((DivExpr) rhs).getOp1();
-						Value op2 = ((DivExpr) rhs).getOp2();
-						vi = divExprInterval(variableName, op1, op2, in);
+					if (unitToVisitCount.get(u) > maxUnitVisit && vi != null
+							&& viToKill != null) {
+						Interval ci = Interval.convergentInterval(
+								viToKill.getInterval(), vi.getInterval());
+						genSet.add(new VarInterval(variableName, ci));
+					} else if (vi != null) {
+						if ((viToKill != null)
+								&& (viToKill.getInterval().isBottom())) vi
+								.getInterval().setBottom(true);
+						genSet.add(vi);
 					}
 				}
 
-				/* Unary operations */
-				else if (rhs instanceof NegExpr) {
-					Value op = ((NegExpr) rhs).getOp();
-					vi = negExprInterval(variableName, op, in);
-				}
-
-				/*
-				 * For all other creatures we do not their values, must assume
-				 * [-INF,INF]
-				 */
-				else {
-					vi = new VarInterval(variableName, new Interval(
-							Interval.NEGATIVE_INF, Interval.POSITIVE_INF));
-				}
-
-				if (unitToVisitCount.get(s) > maxUnitVisit && vi != null
-						&& viToKill != null) {
-					Interval ci = Interval.convergentInterval(
-							viToKill.getInterval(), vi.getInterval());
-					genSet.add(new VarInterval(variableName, ci));
-				} else if (vi != null) {
-					genSet.add(vi);
-				}
 			}
 
+			if (!genSet.isEmpty()) {
+				unitToGenerateSet.put(u, genSet);
+			}
+
+			if (!killSet.isEmpty()) {
+				unitToKillSet.put(u, killSet);
+			}
+
+			/* Subtract kill */
+			in.difference(unitToKillSet.get(u));
+
+			// in.union(unitToGenerateSet.get(u), out);
+
+			/* Constructing branchOuts */
+			for (Iterator it = branchOuts.iterator(); it.hasNext();) {
+
+				FlowSet fs = (FlowSet) it.next();
+				in.union(unitToGenerateSet.get(u), fs);
+
+			}
+			/* Constructing fallOuts */
+			for (Iterator it = fallOut.iterator(); it.hasNext();) {
+
+				FlowSet fs = (FlowSet) it.next();
+				in.union(unitToGenerateSet.get(u), fs);
+			}
 		}
-
-		if (!genSet.isEmpty()) {
-			unitToGenerateSet.put(s, genSet);
-		}
-
-		if (!killSet.isEmpty()) {
-			unitToKillSet.put(s, killSet);
-		}
-
-		/* Update output, subtract kill and add gen */
-		in.difference(unitToKillSet.get(unit));
-		in.union(unitToGenerateSet.get(unit), out);
-
-		/* Debug prints */
-		// G.v().out.println("in= " + in + " kill= " + unitToKillSet.get(unit)
-		// + " gen= " + unitToGenerateSet.get(unit) + " out=" + out);
 	}
 
 	/**
 	 * All paths == Union.
 	 **/
 	protected void merge(Object in1, Object in2, Object out) {
+
 		FlowSet inSet1 = (FlowSet) in1, inSet2 = (FlowSet) in2, outSet = (FlowSet) out;
 		FlowSet genIntervals = emptySet.clone();
 		FlowSet killIntervals = emptySet.clone();
 
 		Iterator set1Iter = inSet1.iterator();
-		// Iterator set2Iter = inSet2.iterator();
-
-		/* Debug prints */
-
-		// G.v().out.println("in1Set size is: " + inSet1.size()
-		// + " , elements are:");
-		// while (set1Iter.hasNext()) {
-		// VarInterval v = (VarInterval) set1Iter.next();
-		// G.v().out.println("varName: " + v.getVar() + " Interval: "
-		// + v.getInterval().toString());
-		// }
-		//
-		//
-		// G.v().out.println("in2Set size is: " + inSet2.size()
-		// + " , elements are:");
-		// while (set2Iter.hasNext()) {
-		// VarInterval v = (VarInterval) set2Iter.next();
-		// G.v().out.println("varName: " + v.getVar() + " Interval: "
-		// + v.getInterval().toString());
-		// }
-		//
-		// set1Iter = inSet1.iterator();
-		// set2Iter = inSet2.iterator();
 
 		/* Combining intervals */
 		while (set1Iter.hasNext()) {
@@ -309,15 +313,6 @@ class LocalIntervalsAnalysis extends ForwardFlowAnalysis {
 				killIntervals.add(vi2);
 			}
 		}
-
-		// Iterator genIter = genIntervals.iterator();
-		// G.v().out.println("genSet size is: " + genIntervals.size()
-		// + " , elements are:");
-		// while (genIter.hasNext()) {
-		// VarInterval v = (VarInterval) genIter.next();
-		// G.v().out.println("varName: " + v.getVar() + " Interval: "
-		// + v.getInterval().toString());
-		// }
 
 		/* outSet = (inSet1 U inSet2) */
 		inSet1.union(inSet2, outSet);
@@ -397,6 +392,165 @@ class LocalIntervalsAnalysis extends ForwardFlowAnalysis {
 		if (op1 == op2) { return new VarInterval(defName, new Interval(1, 1)); }
 
 		return new VarInterval(defName, Interval.div(i1, i2));
+	}
+
+	private void analyzeCondition(boolean holds, Value cond, FlowSet in) {
+
+		if (cond instanceof BinopExpr) {
+
+			BinopExpr expr = (BinopExpr) cond;
+			Value leftOp = expr.getOp1();
+			Value rightOp = expr.getOp2();
+
+			/* Creating Intervals for left and right */
+			VarInterval viLeft = valueToVarInterval("left", leftOp, in);
+			VarInterval viRight = valueToVarInterval("right", rightOp, in);
+
+			if (viLeft != null && viRight != null) {
+
+				/* a < b */
+				if (cond instanceof LtExpr) {
+
+					if (holds) {
+						pairLT(viLeft, viRight);
+					} else {
+						pairLE(viRight, viLeft);
+					}
+				}
+
+				/* a <= b */
+				else if (cond instanceof LeExpr) {
+
+					if (holds) {
+						pairLE(viLeft, viRight);
+					} else {
+						pairLT(viRight, viLeft);
+					}
+				}
+
+				/* a > b */
+				else if (cond instanceof GtExpr) {
+
+					if (holds) {
+						pairLT(viRight, viLeft);
+					} else {
+						pairLE(viLeft, viRight);
+					}
+				}
+				/* a >= b */
+				else if (cond instanceof GtExpr) {
+
+					if (holds) {
+						pairLE(viRight, viLeft);
+					} else {
+						pairLT(viLeft, viRight);
+					}
+				}
+				/* a == b */
+				else if (cond instanceof EqExpr) {
+
+					if (holds) {
+						pairEq(viRight, viLeft);
+					}
+					/* else nothing should be done */
+				}
+
+				/* a != b */
+				else if (cond instanceof NeExpr) {
+
+					if (!holds) {
+						pairEq(viRight, viLeft);
+					}
+					/* else nothing should be done */
+				}
+			}
+		}
+	}
+
+	private VarInterval valueToVarInterval(String varName, Value val, FlowSet in) {
+
+		if (val instanceof IntConstant) {
+			int value = ((IntConstant) val).value;
+			return new VarInterval(varName, new Interval(value, value));
+		} else if (val instanceof Local) { return flowSetContain(in,
+				val.toString()); }
+
+		return null;
+	}
+
+	/* Pair< */
+	private void pairLT(VarInterval viLeft, VarInterval viRight) {
+
+		Interval li = viLeft.getInterval();
+		Interval ri = viRight.getInterval();
+
+		/* In case of bottom */
+		if (li.isBottom() || ri.isBottom()) {
+			viLeft.setInterval(Interval.BOTTOM);
+			viRight.setInterval(Interval.BOTTOM);
+		} else {
+			/* Compute new intervals */
+			Interval newLeftInterval = new Interval(li.getLowerBound(),
+					Math.min(li.getUpperBound(), ri.getUpperBound() - 1));
+
+			Interval newRightInterval = new Interval(Math.max(
+					li.getLowerBound(), ri.getLowerBound()), ri.getUpperBound());
+
+			/* Invoke meet on the result */
+			viLeft.setInterval(Interval.meet(newLeftInterval));
+			viRight.setInterval(Interval.meet(newRightInterval));
+		}
+
+	}
+
+	/* Pair<= */
+	private void pairLE(VarInterval viLeft, VarInterval viRight) {
+
+		Interval li = viLeft.getInterval();
+		Interval ri = viRight.getInterval();
+
+		/* In case of bottom */
+		if (li.isBottom() || ri.isBottom()) {
+			viLeft.setInterval(Interval.BOTTOM);
+			viRight.setInterval(Interval.BOTTOM);
+		} else {
+			/* Compute new intervals */
+			Interval newLeftInterval = new Interval(li.getLowerBound(),
+					Math.min(li.getUpperBound(), ri.getUpperBound()));
+
+			Interval newRightInterval = new Interval(Math.max(
+					li.getLowerBound(), ri.getLowerBound()), ri.getUpperBound());
+
+			/* Invoke meet on the result */
+			viLeft.setInterval(Interval.meet(newLeftInterval));
+			viRight.setInterval(Interval.meet(newRightInterval));
+		}
+
+	}
+
+	/* Pair== */
+	private void pairEq(VarInterval viLeft, VarInterval viRight) {
+
+		Interval li = viLeft.getInterval();
+		Interval ri = viRight.getInterval();
+
+		/* Bottoms are handled by Interval intersection */
+		Interval intersection = Interval.getIntersection(li, ri);
+
+		viLeft.setInterval(intersection);
+		viRight.setInterval(intersection);
+	}
+
+	private FlowSet cloneSet(FlowSet in) {
+
+		FlowSet newSet = emptySet.clone();
+
+		Iterator iter = in.iterator();
+		while (iter.hasNext()) {
+			VarInterval vi = (VarInterval) iter.next();
+			newSet.add(vi.clone());
+		}
+		return newSet;
 	}
 
 	private FlowSet getAllObjField(FlowSet fs) {

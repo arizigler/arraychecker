@@ -1,7 +1,7 @@
 package tests;
 
 @SuppressWarnings("unused")
-public class TestArrayDef {
+public class TestIfElse {
 
 	public static void main(String[] args) {
 

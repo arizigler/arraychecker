@@ -1,7 +1,7 @@
 package tests;
 
 @SuppressWarnings("unused")
-public class TestProgMatrixRotate {
+public class TestWhileLoops {
 
 	public static void rotate() {
 		int a, b, c, d, e, f;
