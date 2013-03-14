@@ -94,8 +94,13 @@ public class BArrayBoundsCheck {
 							Interval arraySizeMaxInterval = Interval
 									.toMaxArrayIndex(arraySizeInterval);
 
+							/* Special case: array size is 0 */
+							if (arraySizeInterval.equals(Interval.ZERO)) {
+								unitToIllegalAccess.put(s, unsafeUpper);
+							}
+
 							/* Special case: access using INF interval */
-							if (indexInterval.equals(Interval.INF)) {
+							else if (indexInterval.equals(Interval.INF)) {
 								unitToIllegalAccess.put(s, pUnsafeLowerUpper);
 							}
 
@@ -112,12 +117,6 @@ public class BArrayBoundsCheck {
 								else {
 									unitToIllegalAccess.put(s, unsafeUpper);
 								}
-							}
-
-							/* Special case: array[0] where array is of size 0 */
-							else if (arraySizeMinInterval.equals(Interval.ZERO)
-									&& indexInterval.equals(Interval.ZERO)) {
-								unitToIllegalAccess.put(s, unsafeUpper);
 							}
 
 							/* Potential illegal access by lower bound */

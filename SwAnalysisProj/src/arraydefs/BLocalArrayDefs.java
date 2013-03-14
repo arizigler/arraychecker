@@ -169,7 +169,9 @@ class BranchLocalArrayDefsAnalysis extends ForwardFlowAnalysis {
 		FlowSet genSet = emptySet.clone();
 		FlowSet killSet = emptySet.clone();
 
-		Unit s = (Unit) unit;
+		Unit u = (Unit) unit;
+
+		Stmt s = (Stmt) u;
 
 		if (s instanceof AssignStmt) {
 
@@ -185,25 +187,29 @@ class BranchLocalArrayDefsAnalysis extends ForwardFlowAnalysis {
 
 					killSet.add(adToKill);
 					killSet.union(unitToKillSet.get(s));
+				}
 
-					// unitToKillSet.put(s, killSet);
+				/* a = foo() where a is an array reference */
+				if (s.containsInvokeExpr()) {
+					genSet.add(new ArrayDef(leftArrayName, Interval.RINF));
 				}
 
 				/* a[] = b where b is an array reference */
-				if (rhs.getType() instanceof ArrayType) {
+				else if (rhs.getType() instanceof ArrayType) {
 
 					String rightArrayName = rhs.toString();
 					ArrayDef ad = flowSetContain(in, rightArrayName);
 
 					if (ad != null) {
 						genSet.add(new ArrayDef(leftArrayName, ad.getInterval()));
+					} else {
+						// genSet.add(new ArrayDef(leftArrayName,
+						// Interval.RINF));
 					}
 				}
 
-				/* a = foo() where a is an array reference */
-				else if (rhs.getType() instanceof InvokeExpr) {
-
-					genSet.add(new ArrayDef(leftArrayName, Interval.INF));
+				else /* Cant determine */{
+					genSet.add(new ArrayDef(leftArrayName, Interval.RINF));
 				}
 			}
 		}

@@ -100,7 +100,7 @@ public class TestDiv {
 
 		x = p; // x is [-INF,INF]
 
-		x = x / x; // x is [1,1] TODO: Fix for x/=x;
+		x = x / x; // x is [1,1]
 
 		array5[x] = 5; // Good
 

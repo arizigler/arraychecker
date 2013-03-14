@@ -27,7 +27,7 @@ public class TestConditionsAndLoops {
 		int a = 1; // a is [1,1]
 		int b = -3; // b is [-3,-3]
 
-		array5[b] = 5; // Potentially illegal lower bound
+		array5[b] = 5; // Illegal lower bound
 
 		if (b < a) {
 			b = b + 4;
@@ -54,20 +54,11 @@ public class TestConditionsAndLoops {
 
 		int c = -8; // c is [-8,-8]
 
-		array16[c] = 5; // illegal lower bound
+		array16[c] = 5; // Illegal lower bound
 
 		if ((b < a) && (c < 0)) {
 			c = c + 8;
 		}
-
-		// now c is [8,8]
-		// array16[c] = 5; // Good
-
-		// for (int i=0; i<10; i++) {
-		//
-		// }
-
-		// to check x = i +200;
 	}
 
 }
