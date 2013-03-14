@@ -4,7 +4,6 @@ import java.util.Iterator;
 import java.util.Map;
 
 import soot.*;
-import soot.tagkit.ColorTag;
 import soot.tagkit.StringTag;
 import soot.toolkits.graph.ExceptionalUnitGraph;
 
@@ -33,9 +32,7 @@ public class ArrayBoundsTagger extends BodyTransformer {
 			String notification = abc.getAccessNotification(s);
 
 			if (notification != null) {
-				// vb.addTag(new ColorTag(ColorTag.BLUE, false, TAG_TYPE));
 				s.addTag(new StringTag(notification, TAG_TYPE));
-				s.addTag(new ColorTag(ColorTag.RED, false, TAG_TYPE));
 			}
 		}
 	}

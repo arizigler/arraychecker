@@ -1,23 +1,5 @@
 package arraydefs;
 
-/* Soot - a J*va Optimization Framework
- * Copyright (C) 2008 Eric Bodden
- *
- * This library is free software; you can redistribute it and/or
- * modify it under the terms of the GNU Lesser General Public
- * License as published by the Free Software Foundation; either
- * version 2.1 of the License, or (at your option) any later version.
- *
- * This library is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
- * Lesser General Public License for more details.
- *
- * You should have received a copy of the GNU Lesser General Public
- * License along with this library; if not, write to the
- * Free Software Foundation, Inc., 59 Temple Place - Suite 330,
- * Boston, MA 02111-1307, USA.
- */
 import intervals.BLocalsInterval;
 
 import java.util.Map;
@@ -33,8 +15,7 @@ public class BMyMain {
 
 					protected void internalTransform(Body body, String phase,
 							Map options) {
-						new BLocalArrayDefs(
-								new ExceptionalUnitGraph(body),
+						new BLocalArrayDefs(new ExceptionalUnitGraph(body),
 								new BLocalsInterval(new ExceptionalUnitGraph(
 										body)));
 						// use G.v().out instead of System.out so that Soot can
