@@ -84,7 +84,7 @@ class BLocalIntervalsAnalysis extends ForwardBranchedFlowAnalysis {
 	Map<Unit, Integer>	unitToVisitCount	= new HashMap<Unit, Integer>(
 													graph.size() * 2 + 1, 0.7f);
 
-	int					maxUnitVisit		= 20;
+	int					maxUnitVisit		= 50;
 
 	BLocalIntervalsAnalysis(UnitGraph graph) {
 		super(graph);
@@ -418,25 +418,9 @@ class BLocalIntervalsAnalysis extends ForwardBranchedFlowAnalysis {
 			Value leftOp = expr.getOp1();
 			Value rightOp = expr.getOp2();
 
-			VarInterval viLeft = null;
-			VarInterval viRight = null;
-
 			/* Creating Intervals for left and right */
-			if (leftOp instanceof IntConstant) {
-				int leftValue = ((IntConstant) leftOp).value;
-				viLeft = new VarInterval("left", new Interval(leftValue,
-						leftValue));
-			} else if (leftOp instanceof Local) {
-				viLeft = flowSetContain(in, leftOp.toString());
-			}
-
-			if (rightOp instanceof IntConstant) {
-				int rightValue = ((IntConstant) rightOp).value;
-				viRight = new VarInterval("right", new Interval(rightValue,
-						rightValue));
-			} else if (rightOp instanceof Local) {
-				viRight = flowSetContain(in, rightOp.toString());
-			}
+			VarInterval viLeft = valueToVarInterval("left", leftOp, in);
+			VarInterval viRight = valueToVarInterval("right", rightOp, in);
 
 			if (viLeft != null && viRight != null) {
 
@@ -487,9 +471,27 @@ class BLocalIntervalsAnalysis extends ForwardBranchedFlowAnalysis {
 					/* else nothing should be done */
 				}
 
+				/* a != b */
+				else if (cond instanceof NeExpr) {
+
+					if (!holds) {
+						pairEq(viRight, viLeft);
+					}
+					/* else nothing should be done */
+				}
 			}
 		}
+	}
 
+	private VarInterval valueToVarInterval(String varName, Value val, FlowSet in) {
+
+		if (val instanceof IntConstant) {
+			int value = ((IntConstant) val).value;
+			return new VarInterval(varName, new Interval(value, value));
+		} else if (val instanceof Local) { return flowSetContain(in,
+				val.toString()); }
+
+		return null;
 	}
 
 	/* Pair< */
@@ -515,14 +517,6 @@ class BLocalIntervalsAnalysis extends ForwardBranchedFlowAnalysis {
 			viRight.setInterval(Interval.meet(newRightInterval));
 		}
 
-		// viLeft.getInterval().setUpperBound(
-		// Math.min(viLeft.getInterval().getUpperBound(), viRight
-		// .getInterval().getUpperBound() - 1));
-
-		// viRight.getInterval().setLowerBound(
-		// Math.max(viLeft.getInterval().getLowerBound(), viRight
-		// .getInterval().getLowerBound()));
-
 	}
 
 	/* Pair<= */
@@ -547,14 +541,6 @@ class BLocalIntervalsAnalysis extends ForwardBranchedFlowAnalysis {
 			viLeft.setInterval(Interval.meet(newLeftInterval));
 			viRight.setInterval(Interval.meet(newRightInterval));
 		}
-
-		// viLeft.getInterval().setUpperBound(
-		// Math.min(viLeft.getInterval().getUpperBound(), viRight
-		// .getInterval().getUpperBound()));
-		//
-		// viRight.getInterval().setLowerBound(
-		// Math.max(viLeft.getInterval().getLowerBound(), viRight
-		// .getInterval().getLowerBound()));
 
 	}
 

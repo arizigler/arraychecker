@@ -12,6 +12,7 @@ public class TestMult {
 		int array16[] = new int[16];
 		int array17[] = new int[17];
 		int array19[] = new int[19];
+		int array20[] = new int[20];
 		int array200[] = new int[200];
 		int array1000[] = new int[1000];
 
@@ -76,12 +77,19 @@ public class TestMult {
 			p *= -2;
 		}
 
-		int i = 0, j = 5;
+		int i = 5, j = 10;
 
-		if (i == j) {
+		if (b) {
+			i = 15;
+			j = 20;
+		}
 
-			array3[j] = 5;
+		// now i is [5,15], j is [10,20]
 
+		if (i != j) {
+			array20[j] = 5;
+		} else {
+			array20[j] = 5;
 		}
 
 		// p is [-INF,INF]
