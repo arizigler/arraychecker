@@ -23,8 +23,8 @@ public class PresentationTest2 {
 			array0[i] = 5; // Good (because we won't get here)
 
 		for (int i = 0; i < 7; i++) {
-			array0[i] = 5; // Potentially illegal upper bound // TODO problem
-			array5[i] = 5; // Potentially illegal upper bound // TODO problem
+			array0[i] = 5; // illegal upper bound
+			array5[i] = 5; // illegal upper bound
 			array7[i] = 5; // Good
 		}
 
