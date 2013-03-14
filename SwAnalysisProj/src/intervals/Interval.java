@@ -12,6 +12,8 @@ public class Interval {
 	public static Interval	ZERO			= new Interval(0, 0);
 	public static Interval	INF				= new Interval(NEGATIVE_INF,
 													POSITIVE_INF);
+	public static Interval	RINF			= new Interval(0, POSITIVE_INF);
+	public static Interval	LINF			= new Interval(NEGATIVE_INF, 0);
 	public static Interval	BOTTOM			= new Interval(0, 0, true);
 
 	public Interval(long lower, long upper) {
@@ -349,6 +351,8 @@ public class Interval {
 	public String toString() {
 		String lower = String.valueOf(m_lowerBound);
 		String upper = String.valueOf(m_upperBound);
+
+		if (this.isBottom()) return "BOTTOM";
 
 		if (m_lowerBound == NEGATIVE_INF) lower = "-INF";
 		if (m_upperBound == POSITIVE_INF) upper = "INF";

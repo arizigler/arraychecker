@@ -35,8 +35,7 @@ public class BLocalArrayDefs {
 	protected Map<Unit, List>	unitToLocalsBefore;
 	protected Map<Unit, List>	unitToLocalsAfter;
 
-	public BLocalArrayDefs(UnitGraph graph,
-			BLocalsInterval intervalAnalysis) {
+	public BLocalArrayDefs(UnitGraph graph, BLocalsInterval intervalAnalysis) {
 
 		BranchLocalArrayDefsAnalysis analysis = new BranchLocalArrayDefsAnalysis(
 				graph, intervalAnalysis);
@@ -177,37 +176,44 @@ class BranchLocalArrayDefsAnalysis extends ForwardFlowAnalysis {
 			Value lhs = ((AssignStmt) s).getLeftOp();
 			Value rhs = ((AssignStmt) s).getRightOp();
 
-			/* a[] = b where b is an array reference */
-			if (rhs.getType() instanceof ArrayType) {
+			if (lhs.getType() instanceof ArrayType) {
+				String leftArrayName = lhs.toString();
 
-				if (lhs.getType() instanceof ArrayType) {
-					String localName = lhs.toString();
-					String arrayName = rhs.toString();
+				/* Kill previous array definition */
+				ArrayDef adToKill = flowSetContain(in, leftArrayName);
+				if (adToKill != null) {
 
-					/* Kill previous array def */
-					ArrayDef adToKill = flowSetContain(in, localName);
-					if (adToKill != null) {
-						killSet.add(adToKill);
-						killSet.union(unitToKillSet.get(s));
+					killSet.add(adToKill);
+					killSet.union(unitToKillSet.get(s));
 
-						unitToKillSet.put(s, killSet);
-					}
+					// unitToKillSet.put(s, killSet);
+				}
 
-					ArrayDef ad = flowSetContain(in, arrayName);
+				/* a[] = b where b is an array reference */
+				if (rhs.getType() instanceof ArrayType) {
+
+					String rightArrayName = rhs.toString();
+					ArrayDef ad = flowSetContain(in, rightArrayName);
+
 					if (ad != null) {
-						genSet.add(new ArrayDef(localName, ad.getInterval()),
-								genSet);
+						genSet.add(new ArrayDef(leftArrayName, ad.getInterval()));
 					}
+				}
+
+				/* a = foo() where a is an array reference */
+				else if (rhs.getType() instanceof InvokeExpr) {
+
+					genSet.add(new ArrayDef(leftArrayName, Interval.INF));
 				}
 			}
 		}
 
-		if (!genSet.isEmpty()) {
-			unitToGenerateSet.put(s, genSet);
-		}
-
 		if (!killSet.isEmpty()) {
 			unitToKillSet.put(s, killSet);
+		}
+
+		if (!genSet.isEmpty()) {
+			unitToGenerateSet.put(s, genSet);
 		}
 
 		/* Update output, subtract kill and add gen */
