@@ -74,7 +74,7 @@ public class TestMult {
 
 		for (int i = 0; i < 5; i++) {
 			array3[i] = 5; // Potentially illegal upper bound
-			array16[i] = 5;
+			array16[i] = 5; // Good
 			p *= -2;
 		}
 

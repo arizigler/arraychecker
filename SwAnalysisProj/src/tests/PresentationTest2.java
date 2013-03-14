@@ -7,6 +7,7 @@ public class PresentationTest2 {
 
 		// arrayX => array of size X
 		int array0[] = new int[0];
+		int array3[] = new int[3];
 		int array5[] = new int[5];
 		int array7[] = new int[7];
 		int array16[] = new int[16];
@@ -16,14 +17,14 @@ public class PresentationTest2 {
 		boolean b0 = args.length == 0;
 		boolean b1 = args.length == 1;
 
-		for (int i = 0; i < 0; i++) {
+		/* Loops and conditions */
+
+		for (int i = 0; i < 0; i++)
 			array0[i] = 5; // Good (because we won't get here)
 
-		}
-
 		for (int i = 0; i < 7; i++) {
-			array0[i] = 5; // Potentially illegal upper bound
-			array5[i] = 5; // Potentially illegal upper bound
+			array0[i] = 5; // illegal upper bound
+			array5[i] = 5; // illegal upper bound
 			array7[i] = 5; // Good
 		}
 
@@ -32,9 +33,7 @@ public class PresentationTest2 {
 
 		array5[b] = 5; // illegal lower bound
 
-		if (b < a) {
-			b = b + 4;
-		}
+		if (b < a) b = b + 4;
 
 		// now b is [1,1]
 		array5[b] = 5; // Good
@@ -64,6 +63,7 @@ public class PresentationTest2 {
 
 		array16[c] = 5; // illegal lower bound
 
+		// a is [15,20], b is [1,1]
 		if (!((b < a) || (c < 0))) c = c - 8; // we won't get here
 		else c = c + 8;
 
@@ -117,16 +117,20 @@ public class PresentationTest2 {
 		int i, j = 0; // i, j are [0,0]
 		for (i = 0; i < 10; i++) {
 			for (j = 0; j < 10; j++) {
-				array18[i + j] = 5; // illegal upper bound (max i+j is 18)
+				array18[i + j] = 5; // Potentially illegal upper bound (max i+j
+									// is 18)
 				array20[i + j] = 5; // Good
 			}
 		}
 
+		/* Boolean operators */
+
 		boolean b2 = args.length <= 2;
+
+		/* operator <= */
 
 		int d = -3;
 
-		// a is [-INF,INF]
 		if (b2) d = 8;
 
 		// d is [-3,8]
@@ -147,15 +151,48 @@ public class PresentationTest2 {
 		array5[f] = 5; // Potentially illegal lower bound
 		array7[f] = 5; // Potentially illegal lower bound
 
+		/* operator >= */
+
+		f = 0; // f is [0,0]
+
+		array5[f] = 5; // Good
+		array7[f] = 5; // Good
+
+		if (e >= d) f = d;
+
+		// f is [-3,4] and not [-3,8]
+		array5[f] = 5; // Potentially illegal lower bound
+		array7[f] = 5; // Potentially illegal lower bound
+
+		/* operator == */
+
 		d = -3;
-		if (b2) d = 8;
 
-		// d is [-3,8]
+		if (b2) d = 2;
 
-		e = 2;
-		if (b2) e = 4;
+		// d is [-3,2] ,e is [2,4]
+		array3[d] = 5; // Potentially illegal lower bound
+		array3[e] = 5; // Potentially illegal upper bound
 
-		// e is [2,4]
+		if (d == e) {
+			// can be only if d and e are 2
+			array3[d] = 5; // Good
+			array3[e] = 5; // Good
+		} else {
+			array3[d] = 5; // Potentially illegal lower bound
+			array3[e] = 5; // Potentially illegal upper bound
+		}
+
+		/* operator != */
+
+		if (d != e) {
+			array3[d] = 5; // Potentially illegal lower bound
+			array3[e] = 5; // Potentially illegal upper bound
+		} else {
+			// can be only if d and e are 2
+			array3[d] = 5; // Good
+			array3[e] = 5; // Good
+		}
 
 		f = 2; // f is [2,2]
 
@@ -167,6 +204,24 @@ public class PresentationTest2 {
 		// f is [2,4] and not [-3,8]
 		array5[f] = 5; // Good
 		array7[f] = 5; // Good
+
+		/* operator < */
+
+		// e is [2,4]
+		if (e < 3)
+		// can be only if e is 2
+		array3[e] = 5; // Good
+		else array3[e] = 5; // illegal upper bound
+
+		/* operator > */
+
+		// e is [2,4]
+		if (3 > e)
+		// can be only if e is 2
+		array3[e] = 5; // Good
+		else array3[e] = 5; // illegal upper bound
+
+		/* Widening */
 
 		a = 0; // a is [0,0]
 		while (b1)
@@ -182,7 +237,5 @@ public class PresentationTest2 {
 		// a is [-INF,INF]
 		array5[a] = 5; // Potentially illegal upper and lower bounds
 		array20[a] = 5; // Potentially illegal upper and lower bounds
-
 	}
-
 }

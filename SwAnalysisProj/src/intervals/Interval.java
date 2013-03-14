@@ -255,6 +255,16 @@ public class Interval {
 		/* dividing by zero --> [-INF,INF] */
 		return new Interval(NEGATIVE_INF, POSITIVE_INF);
 
+		if ((l2 <= -1 && u2 >= -1) && (l2 <= 1 && u2 >= 1)) {
+			// Division by an interval containing zero is not defined under the
+			// basic interval arithmetic
+			if (l1 == POSITIVE_INF || l1 == NEGATIVE_INF || u1 == POSITIVE_INF
+					|| u1 == NEGATIVE_INF) { return new Interval(NEGATIVE_INF,
+					POSITIVE_INF); }
+			long val = Math.max(Math.abs(l1), Math.abs(u1));
+			return new Interval(-val, val);
+		}
+
 		if (l2 == 0) l2 = 1;
 		if (u2 == 0) u2 = -1;
 
