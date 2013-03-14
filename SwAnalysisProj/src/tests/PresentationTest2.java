@@ -1,7 +1,7 @@
 package tests;
 
 @SuppressWarnings("unused")
-public class TestConditionsAndLoops {
+public class PresentationTest2 {
 
 	public static void main(String[] args) {
 
