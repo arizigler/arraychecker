@@ -1,7 +1,7 @@
 package arraycheck;
 
-import intervals.Interval;
 import intervals.LocalsInterval;
+import intervals.Interval;
 
 import java.util.*;
 
@@ -50,6 +50,7 @@ public class ArrayBoundsCheck {
 
 				/* array[i] */
 				if (index instanceof Local) {
+
 					String indexVarName = ((Local) index).toString();
 
 					Interval indexInterval = intAnalysis.getVarIntervalBefore(
@@ -59,53 +60,63 @@ public class ArrayBoundsCheck {
 
 						Interval arraySizeInterval = arrayDef.getInterval();
 
-						/* array size interval [a,b] => [0,a-1] */
-						Interval arraySizeMinInterval = Interval
-								.toMinArrayIndex(arraySizeInterval);
+						/*
+						 * If array size is BOTTOM , or array index is BOTTOM,
+						 * no need to declare overflow.
+						 */
+						if (!(arraySizeInterval.isBottom() || indexInterval
+								.isBottom())) {
 
-						/* array size interval [a,b] => [0,b-1] */
-						Interval arraySizeMaxInterval = Interval
-								.toMaxArrayIndex(arraySizeInterval);
+							/* array size interval [a,b] => [0,a-1] */
+							Interval arraySizeMinInterval = Interval
+									.toMinArrayIndex(arraySizeInterval);
 
-						/* Special case: access using INF interval */
-						if (indexInterval.equals(Interval.INF)) {
-							unitToIllegalAccess.put(s, pUnsafeLowerUpper);
-						}
+							/* array size interval [a,b] => [0,b-1] */
+							Interval arraySizeMaxInterval = Interval
+									.toMaxArrayIndex(arraySizeInterval);
 
-						/* Definite illegal access */
-						else if (!Interval.intersect(indexInterval,
-								arraySizeMaxInterval)) {
-
-							/* Definite illegal access by lower bound */
-							if (Interval.isBefore(indexInterval,
-									arraySizeMaxInterval)) {
-								unitToIllegalAccess.put(s, unsafeLower);
-							}
-							/* Definite illegal access by upper bound */
-							else {
+							/* Special case: array size is 0 */
+							if (arraySizeInterval.equals(Interval.ZERO)) {
 								unitToIllegalAccess.put(s, unsafeUpper);
 							}
-						}
 
-						/* Special case: array[0] where array is of size 0 */
-						else if (arraySizeMinInterval.equals(Interval.ZERO)
-								&& indexInterval.equals(Interval.ZERO)) {
-							unitToIllegalAccess.put(s, unsafeUpper);
-						}
+							/* Special case: access using INF interval */
+							else if (indexInterval.equals(Interval.INF)) {
+								unitToIllegalAccess.put(s, pUnsafeLowerUpper);
+							}
 
-						/* Potential illegal access by lower bound */
-						else if (indexInterval.getLowerBound() < arraySizeMinInterval
-								.getLowerBound()) {
-							if (indexInterval.getUpperBound() == Interval.POSITIVE_INF) {
-								unitToIllegalAccess.put(s, pUnsafeLowerUpper);
-							} else unitToIllegalAccess.put(s, pUnsafeLower);
-						}
-						/* Potential illegal access by upper bound */
-						else if (indexInterval.getUpperBound() > arraySizeMinInterval
-								.getUpperBound()) {
-							if (indexInterval.getLowerBound() == Interval.NEGATIVE_INF) {
-								unitToIllegalAccess.put(s, pUnsafeLowerUpper);
-							} else unitToIllegalAccess.put(s, pUnsafeUpper);
+							/* Definite illegal access */
+							else if (!Interval.intersect(indexInterval,
+									arraySizeMaxInterval)) {
+
+								/* Definite illegal access by lower bound */
+								if (Interval.isBefore(indexInterval,
+										arraySizeMaxInterval)) {
+									unitToIllegalAccess.put(s, unsafeLower);
+								}
+								/* Definite illegal access by upper bound */
+								else {
+									unitToIllegalAccess.put(s, unsafeUpper);
+								}
+							}
+
+							/* Potential illegal access by lower bound */
+							else if (indexInterval.getLowerBound() < arraySizeMinInterval
+									.getLowerBound()) {
+								if (indexInterval.getUpperBound() == Interval.POSITIVE_INF) {
+									unitToIllegalAccess.put(s,
+											pUnsafeLowerUpper);
+								} else unitToIllegalAccess.put(s, pUnsafeLower);
+							}
+							/* Potential illegal access by upper bound */
+							else if (indexInterval.getUpperBound() > arraySizeMinInterval
+									.getUpperBound()) {
+								if (indexInterval.getLowerBound() == Interval.NEGATIVE_INF) {
+									unitToIllegalAccess.put(s,
+											pUnsafeLowerUpper);
+								} else unitToIllegalAccess.put(s, pUnsafeUpper);
+							}
+
 						}
 					}
 				}

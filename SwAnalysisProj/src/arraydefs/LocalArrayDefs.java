@@ -1,7 +1,7 @@
 package arraydefs;
 
-import intervals.Interval;
 import intervals.LocalsInterval;
+import intervals.Interval;
 
 import java.util.*;
 
@@ -17,8 +17,9 @@ public class LocalArrayDefs {
 	protected Map<Unit, List>	unitToLocalsAfter;
 
 	public LocalArrayDefs(UnitGraph graph, LocalsInterval intervalAnalysis) {
-		LocalArrayDefsAnalysis analysis = new LocalArrayDefsAnalysis(graph,
-				intervalAnalysis);
+
+		BranchLocalArrayDefsAnalysis analysis = new BranchLocalArrayDefsAnalysis(
+				graph, intervalAnalysis);
 
 		// Build unitToLocals map
 		unitToLocalsAfter = new HashMap<Unit, List>(graph.size() * 2 + 1, 0.7f);
@@ -60,7 +61,7 @@ public class LocalArrayDefs {
 }
 
 @SuppressWarnings({ "unchecked", "rawtypes" })
-class LocalArrayDefsAnalysis extends ForwardFlowAnalysis {
+class BranchLocalArrayDefsAnalysis extends ForwardFlowAnalysis {
 
 	private FlowSet				emptySet			= new ArraySparseSet();
 	private Map<Unit, FlowSet>	unitToGenerateSet	= new HashMap<Unit, FlowSet>(
@@ -70,11 +71,9 @@ class LocalArrayDefsAnalysis extends ForwardFlowAnalysis {
 															graph.size() * 2 + 1,
 															0.7f);
 
-	LocalArrayDefsAnalysis(UnitGraph graph, LocalsInterval analysis) {
+	BranchLocalArrayDefsAnalysis(UnitGraph graph, LocalsInterval analysis) {
 		super(graph);
 		Iterator unitIt = graph.iterator();
-
-		// LocalsInterval analysis = new LocalsInterval(graph);
 
 		/* Create gen and kill sets */
 		while (unitIt.hasNext()) {
@@ -128,18 +127,6 @@ class LocalArrayDefsAnalysis extends ForwardFlowAnalysis {
 		doAnalysis();
 	}
 
-	// private long getLowerBound(List localsIntervalBefore, String
-	// variableName) {
-	// Iterator fsIter = localsIntervalBefore.iterator();
-	// VarInterval vi = null;
-	// while (fsIter.hasNext()) {
-	// vi = (VarInterval) fsIter.next();
-	// if (vi.getVar().equals(variableName)) { return vi.getInterval()
-	// .getLowerBound(); }
-	// }
-	// return 0;
-	// }
-
 	/**
 	 * All INs are initialized to the empty set.
 	 **/
@@ -163,53 +150,63 @@ class LocalArrayDefsAnalysis extends ForwardFlowAnalysis {
 		FlowSet genSet = emptySet.clone();
 		FlowSet killSet = emptySet.clone();
 
-		Unit s = (Unit) unit;
+		Unit u = (Unit) unit;
+
+		Stmt s = (Stmt) u;
 
 		if (s instanceof AssignStmt) {
 
 			Value lhs = ((AssignStmt) s).getLeftOp();
 			Value rhs = ((AssignStmt) s).getRightOp();
 
-			/* a[] = b where b is an array reference */
-			if (rhs.getType() instanceof ArrayType) {
+			if (lhs.getType() instanceof ArrayType) {
+				String leftArrayName = lhs.toString();
 
-				if (lhs.getType() instanceof ArrayType) {
-					String localName = lhs.toString();
-					String arrayName = rhs.toString();
+				/* Kill previous array definition */
+				ArrayDef adToKill = flowSetContain(in, leftArrayName);
+				if (adToKill != null) {
 
-					/* Kill previous array def */
-					ArrayDef adToKill = flowSetContain(in, localName);
-					if (adToKill != null) {
-						killSet.add(adToKill);
-						killSet.union(unitToKillSet.get(s));
+					killSet.add(adToKill);
+					killSet.union(unitToKillSet.get(s));
+				}
 
-						unitToKillSet.put(s, killSet);
-					}
+				/* a = foo() where a is an array reference */
+				if (s.containsInvokeExpr()) {
+					genSet.add(new ArrayDef(leftArrayName, Interval.RINF));
+				}
 
-					ArrayDef ad = flowSetContain(in, arrayName);
+				/* a[] = b where b is an array reference */
+				else if (rhs.getType() instanceof ArrayType) {
+
+					String rightArrayName = rhs.toString();
+					ArrayDef ad = flowSetContain(in, rightArrayName);
+
 					if (ad != null) {
-						genSet.add(new ArrayDef(localName, ad.getInterval()),
-								genSet);
+						genSet.add(new ArrayDef(leftArrayName, ad.getInterval()));
+					} else {
+						// genSet.add(new ArrayDef(leftArrayName,
+						// Interval.RINF));
 					}
 				}
-			}
-		}
 
-		if (!genSet.isEmpty()) {
-			unitToGenerateSet.put(s, genSet);
+				else /* Cant determine */{
+					genSet.add(new ArrayDef(leftArrayName, Interval.RINF));
+				}
+			}
 		}
 
 		if (!killSet.isEmpty()) {
 			unitToKillSet.put(s, killSet);
 		}
 
+		if (!genSet.isEmpty()) {
+			unitToGenerateSet.put(s, genSet);
+		}
+
 		/* Update output, subtract kill and add gen */
 		in.difference(unitToKillSet.get(s));
 		in.union(unitToGenerateSet.get(s), out);
 
-		/* Debug prints */
-		// G.v().out.println("in= " + in + " kill= " + unitToKillSet.get(unit)
-		// + " gen= " + unitToGenerateSet.get(unit) + " out=" + out);
 	}
 
 	/**
@@ -222,30 +219,6 @@ class LocalArrayDefsAnalysis extends ForwardFlowAnalysis {
 		FlowSet killArrayDefs = emptySet.clone();
 
 		Iterator set1Iter = inSet1.iterator();
-		// Iterator set2Iter = inSet2.iterator();
-
-		/* Debug prints */
-
-		// G.v().out.println("in1Set size is: " + inSet1.size()
-		// + " , elements are:");
-		// while (set1Iter.hasNext()) {
-		// VarInterval v = (VarInterval) set1Iter.next();
-		// G.v().out.println("varName: " + v.getVar() + " Interval: "
-		// + v.getInterval().toString());
-		// }
-		//
-		//
-		// G.v().out.println("in2Set size is: " + inSet2.size()
-		// + " , elements are:");
-		// while (set2Iter.hasNext()) {
-		// VarInterval v = (VarInterval) set2Iter.next();
-		// G.v().out.println("varName: " + v.getVar() + " Interval: "
-		// + v.getInterval().toString());
-		// }
-		//
-
-		// set1Iter = inSet1.iterator();
-		// set2Iter = inSet2.iterator();
 
 		/* Combining array definitions - taking the minimum size */
 		while (set1Iter.hasNext()) {
@@ -258,15 +231,6 @@ class LocalArrayDefsAnalysis extends ForwardFlowAnalysis {
 				killArrayDefs.add(ad2);
 			}
 		}
-
-		// Iterator genIter = genIntervals.iterator();
-		// G.v().out.println("genSet size is: " + genIntervals.size()
-		// + " , elements are:");
-		// while (genIter.hasNext()) {
-		// VarInterval v = (VarInterval) genIter.next();
-		// G.v().out.println("varName: " + v.getVar() + " Interval: "
-		// + v.getInterval().toString());
-		// }
 
 		/* outSet = (inSet1 U inSet2) */
 		inSet1.union(inSet2, outSet);

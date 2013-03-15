@@ -23,7 +23,8 @@ public class ArrayBoundsTagger extends BodyTransformer {
 
 	protected void internalTransform(Body b, String phaseName, Map options) {
 
-		ArrayBoundsCheck abc = new ArrayBoundsCheck(new ExceptionalUnitGraph(b));
+		ArrayBoundsCheck abc = new ArrayBoundsCheck(new ExceptionalUnitGraph(
+				b));
 		Iterator unitIt = b.getUnits().iterator();
 
 		while (unitIt.hasNext()) {
