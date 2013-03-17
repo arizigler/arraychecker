@@ -179,7 +179,6 @@ class BLocalIntervalsAnalysis extends ForwardBranchedFlowAnalysis {
 					else if (rhs instanceof Local || rhs instanceof FieldRef
 							|| rhs instanceof ArrayRef) {
 						VarInterval rhsVi = flowSetContain(in, rhs.toString());
-						// TODO : maybe assert in case it null (only for local)
 						if (rhsVi != null) {
 							vi = new VarInterval(variableName,
 									rhsVi.getInterval());
@@ -438,7 +437,7 @@ class BLocalIntervalsAnalysis extends ForwardBranchedFlowAnalysis {
 					}
 				}
 				/* a >= b */
-				else if (cond instanceof GtExpr) {
+				else if (cond instanceof GeExpr) {
 
 					if (holds) {
 						pairLE(viRight, viLeft);
