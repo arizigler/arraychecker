@@ -6,7 +6,6 @@ public class PresentationTest2 {
 
 		// arrayX => array of size X
 		int array0[] = new int[0];
-		int array1[] = new int[1];
 		int array2[] = new int[2];
 		int array3[] = new int[3];
 		int array5[] = new int[5];
