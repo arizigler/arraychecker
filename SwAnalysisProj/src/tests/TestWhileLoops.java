@@ -1,6 +1,5 @@
 package tests;
 
-@SuppressWarnings("unused")
 public class TestWhileLoops {
 
 	public static void rotate() {

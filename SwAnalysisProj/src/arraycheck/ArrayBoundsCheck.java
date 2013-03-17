@@ -1,7 +1,7 @@
 package arraycheck;
 
-import intervals.LocalsInterval;
 import intervals.Interval;
+import intervals.LocalsInterval;
 
 import java.util.*;
 
@@ -100,13 +100,19 @@ public class ArrayBoundsCheck {
 								}
 							}
 
-							/* Potential illegal access by lower bound */
+							/*
+							 * Potential illegal access by lower and upper
+							 * bounds
+							 */
 							else if (indexInterval.getLowerBound() < arraySizeMinInterval
 									.getLowerBound()) {
-								if (indexInterval.getUpperBound() == Interval.POSITIVE_INF) {
+								if (indexInterval.getUpperBound() == Interval.POSITIVE_INF
+										|| indexInterval.getUpperBound() > arraySizeMinInterval
+												.getUpperBound()) {
 									unitToIllegalAccess.put(s,
 											pUnsafeLowerUpper);
-								} else unitToIllegalAccess.put(s, pUnsafeLower);
+								} /* Potential illegal access by lower bound */
+								else unitToIllegalAccess.put(s, pUnsafeLower);
 							}
 							/* Potential illegal access by upper bound */
 							else if (indexInterval.getUpperBound() > arraySizeMinInterval

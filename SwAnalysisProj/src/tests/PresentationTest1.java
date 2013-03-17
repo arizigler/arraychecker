@@ -1,9 +1,9 @@
 package tests;
 
+@SuppressWarnings("unused")
 public class PresentationTest1 {
 
 	private int	iField5;
-	private int	iField10;
 	private int	iField15;
 
 	public void method(String[] args) {
@@ -11,14 +11,8 @@ public class PresentationTest1 {
 		// arrayX => array of size X
 		int array0[] = new int[0];
 		int array1[] = new int[1];
-		int array2[] = new int[2];
-		int array3[] = new int[3];
-		int array4[] = new int[4];
 		int array5[] = new int[5];
 		int array10[] = new int[10];
-		int array15[] = new int[15];
-		int array20[] = new int[20];
-		int array50[] = new int[50];
 
 		final int i_10 = -10; // i_5 is [-10,-10]
 		final int i_5 = -5; // i_5 is [-5,-5]
@@ -117,8 +111,6 @@ public class PresentationTest1 {
 		/* Tracking class fields */
 
 		this.iField5 = 5; // iField5 is [5,5]
-
-		this.iField10 = 10; // iField10 is [10,10]
 
 		this.iField15 = 15; // iField15 is [15,15]
 
