@@ -69,7 +69,7 @@ public class PresentationTest2 {
 		if (!((b < a) || (c < 0))) c = c - 8; // Condition does not hold
 		else c = c + 8;
 
-		// now c is [8,8]
+		// now c is [0,0]
 		array16[c] = 5; // OK
 
 		c = 1; // c is [1,1]
@@ -175,7 +175,7 @@ public class PresentationTest2 {
 
 		if (b2) d = 2;
 
-		// d is [-3,2] , e is [2,4]
+		// Reminder: d is [-3,2] , e is [2,4]
 		array2[d] = 5; // Potentially illegal lower and upper bounds
 		array3[d] = 5; // Potentially illegal lower bound
 		array3[e] = 5; // Potentially illegal upper bound
@@ -214,8 +214,8 @@ public class PresentationTest2 {
 		// Reminder: d is [-3,2] ,e is [2,4]
 		if (!(d != e)) f = d; // Possible only if d == e == [2,2]
 
-		// f is [2,2] ( and not [-3,8] )
-		array3[f] = 5;
+		// f is [2,2] ( and not [-3,2] )
+		array2[f] = 5; // Illegal upper bound (legal range is 0-1)
 		array5[f] = 5; // OK
 		array7[f] = 5; // OK
 

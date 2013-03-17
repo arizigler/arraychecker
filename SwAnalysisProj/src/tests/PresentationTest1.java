@@ -36,7 +36,7 @@ public class PresentationTest1 {
 
 		array10[20] = 5; // Illegal upper bound
 
-		array10[i5] = 5; // Good
+		array10[i5] = 5; // OK
 
 		array10[i_5] = 5; // Illegal lower bound
 
@@ -62,7 +62,7 @@ public class PresentationTest1 {
 
 		array5[p] = 5; // Illegal upper bound ( legal index range is [0,4] )
 
-		p *= i10; // p is [10,10]
+		p *= i10; // p is [50,50]
 
 		array5[p] = 5; // Illegal upper bound
 
