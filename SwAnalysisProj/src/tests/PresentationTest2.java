@@ -175,7 +175,7 @@ public class PresentationTest2 {
 
 		if (b2) d = 2;
 
-		// Reminder: d is [-3,8] , e is [2,4]
+		// d is [-3,2] , e is [2,4]
 		array2[d] = 5; // Potentially illegal lower and upper bounds
 		array3[d] = 5; // Potentially illegal lower bound
 		array3[e] = 5; // Potentially illegal upper bound
